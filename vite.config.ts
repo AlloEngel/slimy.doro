@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "path";
 
 // Tauri expects a fixed port and relative asset paths in production.
 // See: https://v2.tauri.app/start/frontend/vite/
@@ -9,6 +10,13 @@ export default defineConfig(async () => ({
   plugins: [react()],
   base: "./",
 
+  // Mapeia o alias @/ para o diretório src
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+
   // Vite options tailored for Tauri development
   clearScreen: false,
   server: {
@@ -16,12 +24,12 @@ export default defineConfig(async () => ({
     strictPort: true,
     host: host || false,
     hmr: host
-      ? {
+        ? {
           protocol: "ws",
           host,
           port: 1421,
         }
-      : undefined,
+        : undefined,
     watch: {
       // Don't watch the src-tauri directory from Vite, Cargo handles it.
       ignored: ["**/src-tauri/**"],
