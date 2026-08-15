@@ -1,0 +1,12 @@
+{
+  "id": "dusk-slate",
+  "name": "Dusk Slate",
+  "colors": {
+    "surface": "#20242F",
+    "surfaceSoft": "#2A2F3D",
+    "accent": "#7FC0D6",
+    "accentDim": "#5B93C7",
+    "text": "#E7E9EE",
+    "textDeep": "#FFFFFF"
+  }
+}

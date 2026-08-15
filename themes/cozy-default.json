@@ -1,0 +1,12 @@
+{
+  "id": "cozy-default",
+  "name": "Cozy Cream",
+  "colors": {
+    "surface": "#F9F5F1",
+    "surfaceSoft": "#F2ECE4",
+    "accent": "#E08E79",
+    "accentDim": "#C97A65",
+    "text": "#4E596F",
+    "textDeep": "#333B4D"
+  }
+}

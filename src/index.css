@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface: #f9f5f1;
+  --surface-soft: #f2ece4;
+  --accent: #e08e79;
+  --accent-dim: #c97a65;
+  --text: #4e596f;
+  --text-deep: #333b4d;
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  /* The Tauri window itself is transparent; the app surface paints its
+     own rounded, semi-opaque background so the OS desktop shows through
+     at the edges. */
+  background: transparent;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  font-family: "Nunito Sans", system-ui, sans-serif;
+}
+
+/* Nearest-neighbor scaling is required for every pixel-art sprite. */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Contrast mode driven by the current opacity preset (see lib/theme.ts). */
+.contrast-dark {
+  color: var(--text-deep);
+}
+.contrast-light {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text) 35%, transparent);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Respect reduced-motion preferences across all custom animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
