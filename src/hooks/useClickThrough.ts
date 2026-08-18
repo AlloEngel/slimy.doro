@@ -1,14 +1,10 @@
+// Added a second listener for the global-shortcut event. Unlike the
+// tray toggle (which flips state), this one always forces `pinned`
+// to false — it's the "get me unstuck" button, not a toggle.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { setPinMode, isTauri } from "@/lib/tauri";
 
-/**
- * Pin mode makes the overlay window ignore all mouse events so clicks
- * pass through to whatever app is behind it. The window itself can't
- * un-pin itself from inside once pinned (it's not receiving clicks!),
- * so the tray menu's "Toggle Pin Mode" item is the escape hatch — it's
- * listened for here via a Tauri event.
- */
 export function useClickThrough() {
   const [pinned, setPinned] = useState(false);
   const pinnedRef = useRef(pinned);
@@ -25,15 +21,24 @@ export function useClickThrough() {
 
   useEffect(() => {
     if (!isTauri) return;
-    let unlisten: (() => void) | undefined;
+    const unlisteners: Array<() => void> = [];
+
     getCurrentWindow()
-      .listen("tray://toggle-pin", () => {
-        void setPin(!pinnedRef.current);
-      })
-      .then((fn) => {
-        unlisten = fn;
-      });
-    return () => unlisten?.();
+        .listen("tray://toggle-pin", () => {
+          void setPin(!pinnedRef.current);
+        })
+        .then((fn) => unlisteners.push(fn));
+
+    // Emergency unpin (global shortcut) — always forces unpinned,
+    // regardless of current state, and syncs the React side after
+    // the Rust side has already cleared click-through/always-on-top.
+    getCurrentWindow()
+        .listen("shortcut://force-unpin", () => {
+          setPinned(false);
+        })
+        .then((fn) => unlisteners.push(fn));
+
+    return () => unlisteners.forEach((fn) => fn());
   }, [setPin]);
 
   return { pinned, togglePin, setPin };

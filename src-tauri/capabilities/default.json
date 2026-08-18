@@ -21,6 +21,8 @@
     "fs:allow-appdata-read-recursive",
     "notification:default",
     "notification:allow-notify",
-    "positioner:default"
+    "positioner:default",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister"
   ]
 }
