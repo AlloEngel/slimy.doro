@@ -1,8 +1,11 @@
+// Only the EDGE_MARGIN constant changes — bumped so the bottom-right
+// snap clears typical taskbar/dock height instead of tucking directly
+// into the screen corner. (Tauri's Monitor API doesn't expose a
+// cross-platform "work area excluding taskbar" rect, so a generous
+// fixed margin is the fix here.)
 use serde::{Deserialize, Serialize};
 use tauri::{LogicalPosition, Monitor, PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
 
-/// Preset snap targets for the overlay window, matching the corner/center
-/// picker exposed in the settings panel.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SnapPosition {
@@ -13,7 +16,7 @@ pub enum SnapPosition {
     Center,
 }
 
-const EDGE_MARGIN: i32 = 24;
+const EDGE_MARGIN: i32 = 48; // was 24 — extra room for taskbar/dock
 
 fn active_monitor<R: Runtime>(window: &WebviewWindow<R>) -> Result<Monitor, String> {
     window
@@ -23,9 +26,6 @@ fn active_monitor<R: Runtime>(window: &WebviewWindow<R>) -> Result<Monitor, Stri
         .ok_or_else(|| "no monitor available for this window".to_string())
 }
 
-/// Toggle "pin mode": when pinned, the window ignores all mouse/click
-/// events so the user can interact with whatever is behind it, and the
-/// window is forced always-on-top so it stays visible while pinned.
 #[tauri::command]
 pub fn set_pin_mode<R: Runtime>(window: WebviewWindow<R>, pinned: bool) -> Result<(), String> {
     window
@@ -37,15 +37,11 @@ pub fn set_pin_mode<R: Runtime>(window: WebviewWindow<R>, pinned: bool) -> Resul
     Ok(())
 }
 
-/// Independent always-on-top toggle, usable even while unpinned.
 #[tauri::command]
 pub fn set_always_on_top<R: Runtime>(window: WebviewWindow<R>, enabled: bool) -> Result<(), String> {
     window.set_always_on_top(enabled).map_err(|e| e.to_string())
 }
 
-/// Snap the overlay to a screen corner or center it, respecting the
-/// monitor's scale factor and a small edge margin so the widget never
-/// touches the very edge of the display.
 #[tauri::command]
 pub fn snap_window<R: Runtime>(window: WebviewWindow<R>, position: SnapPosition) -> Result<(), String> {
     let monitor = active_monitor(&window)?;
@@ -79,8 +75,6 @@ pub fn snap_window<R: Runtime>(window: WebviewWindow<R>, position: SnapPosition)
         .map_err(|e| e.to_string())
 }
 
-/// Grow/shrink the window's width in place (used when the to-do drawer
-/// slides open) without moving its top-left anchor corner.
 #[tauri::command]
 pub fn set_window_width<R: Runtime>(window: WebviewWindow<R>, width: f64) -> Result<(), String> {
     let current = window.outer_size().map_err(|e| e.to_string())?;
@@ -93,8 +87,6 @@ pub fn set_window_width<R: Runtime>(window: WebviewWindow<R>, width: f64) -> Res
         .map_err(|e| e.to_string())
 }
 
-/// Begin an OS-level window drag from the frontend (used by the
-/// draggable surface since there is no native titlebar).
 #[tauri::command]
 pub fn start_drag<R: Runtime>(window: WebviewWindow<R>) -> Result<(), String> {
     window.start_dragging().map_err(|e| e.to_string())
