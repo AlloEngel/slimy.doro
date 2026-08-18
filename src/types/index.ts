@@ -13,11 +13,11 @@ export interface Task {
 export type OpacityPreset = 20 | 40 | 60 | 80;
 
 export type SnapPosition =
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right"
-  | "center";
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right"
+    | "center";
 
 export interface TimerSettings {
   focusMinutes: number;
@@ -55,7 +55,7 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
   cyclesBeforeLongBreak: 4,
-  autoStartNext: false,
+  autoStartNext: true, // was false — sessions now chain automatically
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
