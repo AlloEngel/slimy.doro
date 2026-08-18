@@ -1,3 +1,7 @@
+// Structurally unchanged — the overlap bug was actually caused by the
+// embedded content underneath colliding with these, not by this file.
+// App.tsx's new `pt-10` on the content wrapper is the real fix; this
+// file is included so the z-index/positioning contract is visible.
 import { type ReactNode } from "react";
 import { Minus, Pin, PinOff, Settings, X } from "lucide-react";
 import { closeApp, minimizeApp } from "@/lib/tauri";
@@ -9,56 +13,56 @@ interface Props {
 }
 
 function ControlButton({
-  label,
-  onClick,
-  children,
-  active,
-}: {
+                         label,
+                         onClick,
+                         children,
+                         active,
+                       }: {
   label: string;
   onClick: () => void;
   children: ReactNode;
   active?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      data-no-drag
-      className={`flex h-7 w-7 items-center justify-center rounded-full transition active:scale-90 ${
-        active ? "bg-terracotta text-cream" : "bg-black/5 text-current hover:bg-black/10"
-      }`}
-    >
-      {children}
-    </button>
+      <button
+          type="button"
+          onClick={onClick}
+          aria-label={label}
+          title={label}
+          data-no-drag
+          className={`flex h-7 w-7 items-center justify-center rounded-full transition active:scale-90 ${
+              active ? "bg-terracotta text-cream" : "bg-black/5 text-current hover:bg-black/10"
+          }`}
+      >
+        {children}
+      </button>
   );
 }
 
 export function TitleBarControls({ pinned, onTogglePin, onOpenSettings }: Props) {
   return (
-    <>
-      <div className="absolute left-3 top-3 z-20" data-no-drag>
-        <ControlButton
-          label={pinned ? "Unpin (disable click-through)" : "Pin window (click-through)"}
-          onClick={onTogglePin}
-          active={pinned}
-        >
-          {pinned ? <PinOff size={14} /> : <Pin size={14} />}
-        </ControlButton>
-      </div>
+      <>
+        <div className="absolute left-3 top-3 z-20" data-no-drag>
+          <ControlButton
+              label={pinned ? "Unpin (disable click-through)" : "Pin window (click-through)"}
+              onClick={onTogglePin}
+              active={pinned}
+          >
+            {pinned ? <PinOff size={14} /> : <Pin size={14} />}
+          </ControlButton>
+        </div>
 
-      <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5" data-no-drag>
-        <ControlButton label="Settings" onClick={onOpenSettings}>
-          <Settings size={14} />
-        </ControlButton>
-        <ControlButton label="Minimize" onClick={() => void minimizeApp()}>
-          <Minus size={14} />
-        </ControlButton>
-        <ControlButton label="Close" onClick={() => void closeApp()}>
-          <X size={14} />
-        </ControlButton>
-      </div>
-    </>
+        <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5" data-no-drag>
+          <ControlButton label="Settings" onClick={onOpenSettings}>
+            <Settings size={14} />
+          </ControlButton>
+          <ControlButton label="Minimize" onClick={() => void minimizeApp()}>
+            <Minus size={14} />
+          </ControlButton>
+          <ControlButton label="Close" onClick={() => void closeApp()}>
+            <X size={14} />
+          </ControlButton>
+        </div>
+      </>
   );
 }
