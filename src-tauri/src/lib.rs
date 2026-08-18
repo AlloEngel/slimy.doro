@@ -2,7 +2,7 @@ mod commands;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri::Manager;
+use tauri::{Emitter, Manager}; // <-- add Emitter here
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
