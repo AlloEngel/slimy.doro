@@ -17,24 +17,22 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  /* The Tauri window itself is transparent; the app surface paints its
-     own rounded, semi-opaque background so the OS desktop shows through
-     at the edges. */
   background: transparent;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
   font-family: "Nunito Sans", system-ui, sans-serif;
+  /* Base weight bumped from 400 -> 500: at the smaller window scale,
+     regular weight starts looking thin/fuzzy on pixel-density displays. */
+  font-weight: 500;
 }
 
-/* Nearest-neighbor scaling is required for every pixel-art sprite. */
 .pixelated {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
 
-/* Contrast mode driven by the current opacity preset (see lib/theme.ts). */
 .contrast-dark {
   color: var(--text-deep);
 }
@@ -44,7 +42,7 @@ body,
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 ::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--text) 35%, transparent);
@@ -54,7 +52,6 @@ body,
   background: transparent;
 }
 
-/* Respect reduced-motion preferences across all custom animations. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

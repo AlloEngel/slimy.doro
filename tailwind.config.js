@@ -5,21 +5,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Cozy UI palette — from design spec V2.0
-        cream: {
-          DEFAULT: "#F9F5F1",
-          soft: "#F2ECE4",
-        },
-        terracotta: {
-          DEFAULT: "#E08E79",
-          dim: "#C97A65",
-          bright: "#EFA48F",
-        },
-        slate: {
-          text: "#4E596F",
-          deep: "#333B4D",
-        },
-        // Slime reference palette (cool blues, used sparingly outside the pet stage)
+        cream: { DEFAULT: "#F9F5F1", soft: "#F2ECE4" },
+        terracotta: { DEFAULT: "#E08E79", dim: "#C97A65", bright: "#EFA48F" },
+        slate: { text: "#4E596F", deep: "#333B4D" },
         slime: {
           900: "#2F3E63",
           700: "#3E6FA6",
@@ -28,19 +16,16 @@ export default {
           100: "#B9E4DE",
           50: "#EFF3EC",
         },
-        contrast: {
-          light: "#FFFFFF",
-          dark: "#1E1E1E",
-        },
+        contrast: { light: "#FFFFFF", dark: "#1E1E1E" },
       },
       fontFamily: {
-        display: ["'Press Start 2P'", "monospace"],
+        // Cross-platform pixel-style font — no local install needed,
+        // loaded via Google Fonts in index.html.
+        display: ["'Pixelify Sans'", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "'IBM Plex Mono'", "ui-monospace", "monospace"],
         body: ["'Nunito Sans'", "system-ui", "sans-serif"],
       },
-      borderRadius: {
-        cozy: "24px",
-      },
+      borderRadius: { cozy: "20px" },
       keyframes: {
         "float-up": {
           "0%": { transform: "translateY(0)", opacity: "0" },
