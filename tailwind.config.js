@@ -5,27 +5,39 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: { DEFAULT: "#F9F5F1", soft: "#F2ECE4" },
-        terracotta: { DEFAULT: "#E08E79", dim: "#C97A65", bright: "#EFA48F" },
-        slate: { text: "#4E596F", deep: "#333B4D" },
+        // RPG/fantasy slime palette — same token names as before,
+        // new values, so existing className usage repaints for free.
+        cream: {
+          DEFAULT: "#F1F5F9", // near-white, used as light text on accent buttons
+          soft: "#1F2530",    // dark soft surface
+        },
+        terracotta: {
+          DEFAULT: "#38EF7D", // neon slime green — primary accent
+          dim: "#16A34A",
+          bright: "#6EE7B7",
+        },
+        slate: {
+          text: "#94A3B8", // muted light gray for secondary text on dark bg
+          deep: "#F1F5F9", // near-white for headings/primary text
+        },
         slime: {
-          900: "#2F3E63",
-          700: "#3E6FA6",
-          500: "#5B93C7",
-          300: "#7FC0D6",
-          100: "#B9E4DE",
-          50: "#EFF3EC",
+          900: "#0B1420",
+          700: "#16A34A",
+          500: "#38EF7D",
+          300: "#6EE7B7",
+          100: "#B9F5D8",
+          50: "#E6FBF0",
         },
         contrast: { light: "#FFFFFF", dark: "#1E1E1E" },
       },
       fontFamily: {
-        // Cross-platform pixel-style font — no local install needed,
-        // loaded via Google Fonts in index.html.
         display: ["'Pixelify Sans'", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "'IBM Plex Mono'", "ui-monospace", "monospace"],
-        body: ["'Nunito Sans'", "system-ui", "sans-serif"],
+        // Body/base font is now Pixelify Sans globally, per requirement #4.
+        body: ["'Pixelify Sans'", "cursive", "sans-serif"],
+        sans: ["'Pixelify Sans'", "cursive", "sans-serif"],
       },
-      borderRadius: { cozy: "20px" },
+      borderRadius: { cozy: "18px" },
       keyframes: {
         "float-up": {
           "0%": { transform: "translateY(0)", opacity: "0" },

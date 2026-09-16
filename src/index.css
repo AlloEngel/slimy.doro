@@ -3,13 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --surface: #f9f5f1;
-  --surface-soft: #f2ece4;
-  --accent: #e08e79;
-  --accent-dim: #c97a65;
-  --text: #4e596f;
-  --text-deep: #333b4d;
-  color-scheme: light;
+  /* Deep fantasy dark surface + slime-green accent (RPG theme) */
+  --surface: #161a23;
+  --surface-soft: #1f2530;
+  --accent: #38ef7d;
+  --accent-dim: #22c55e;
+  --text: #cbd5e1;
+  --text-deep: #f1f5f9;
+  color-scheme: dark;
 }
 
 html,
@@ -21,9 +22,7 @@ body,
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
-  font-family: "Nunito Sans", system-ui, sans-serif;
-  /* Base weight bumped from 400 -> 500: at the smaller window scale,
-     regular weight starts looking thin/fuzzy on pixel-density displays. */
+  font-family: "Pixelify Sans", cursive, sans-serif;
   font-weight: 500;
 }
 
@@ -33,19 +32,23 @@ body,
   image-rendering: crisp-edges;
 }
 
+/* Both branches now assume a dark surface — "dark" mode uses the
+   theme's own light text color, "light" mode is a universal white
+   with shadow for when the surface is mostly transparent and an
+   unknown desktop background shows through. */
 .contrast-dark {
   color: var(--text-deep);
 }
 .contrast-light {
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
 
 ::-webkit-scrollbar {
   width: 5px;
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-track {
@@ -67,4 +70,21 @@ input:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Retro RPG button: crisp border, inset highlight/shadow, slime glow.
+   Used on the main Start/Pause CTA (requirement #6). */
+.btn-pixel {
+  border: 2px solid color-mix(in srgb, var(--accent) 65%, black);
+  box-shadow:
+          inset 0 -3px 0 0 color-mix(in srgb, var(--accent) 45%, black),
+          inset 0 2px 0 0 color-mix(in srgb, white 25%, transparent),
+          0 0 14px 0 color-mix(in srgb, var(--accent) 55%, transparent);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.btn-pixel:active {
+  transform: translateY(2px);
+  box-shadow:
+          inset 0 2px 0 0 color-mix(in srgb, var(--accent) 45%, black),
+          0 0 6px 0 color-mix(in srgb, var(--accent) 40%, transparent);
 }
