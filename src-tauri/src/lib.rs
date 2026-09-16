@@ -4,9 +4,8 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{Emitter, Manager};
 
-// Import unconditionally — gating the `use` itself behind #[cfg(desktop)]
-// is what broke the build; only the registration LOGIC below needs the
-// cfg gate, same pattern as single_instance/window_state further down.
+
+
 use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut, ShortcutState};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

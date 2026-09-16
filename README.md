@@ -6,7 +6,7 @@ Open source, MIT licensed, PRs welcome.
 
 ## Why
 
-Every Pomodoro app I tried was either too plain or too bloated. I wanted a widget I could pin in a corner, forget about, and glance at — something that felt more like a pet than a productivity tool. So I built one.
+Every Pomodoro app I tried was either too plain or too bloated. I wanted a widget I could pin in a corner, forget about, and glance at — something that felt more like a pet than a productivity tool.
 
 ## Requirements
 
@@ -43,7 +43,7 @@ tauri.conf.json transparent/frameless window config
 
 src/ React frontend
 components/ SlimeStage, TimerDisplay, TitleBarControls,
-TodoCompact, TodoDrawer, SettingsPanel
+TodoCompact, SettingsPanel
 hooks/ sprite animation loop, pomodoro ticker, drag,
 click-through sync, drawer resize sync
 store/useAppStore.ts settings, tasks, timer state machine (zustand)
@@ -94,7 +94,7 @@ Frames render on a `<canvas>` with `image-rendering: pixelated`, driven by a `re
 
 - **Pin mode** (top-left icon) — click-through so it sits over whatever you're working in. Since a pinned window can't receive the click to unpin itself, use the tray menu's "Toggle Pin Mode" if you get stuck.
 - **Snap positions** — corner/center snapping from Settings → Window position.
-- **To-do drawer** — expanding it grows the window and shifts it left in the same motion, so the extra space opens up on the left instead of pushing the whole thing off-screen.
+- **Emergency unpin shortcut** — Ctrl+Shift+U (Cmd+Shift+U on macOS).
 
 ## Contributing
 

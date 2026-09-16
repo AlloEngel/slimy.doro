@@ -1,3 +1,4 @@
+# src-tauri/Cargo.toml
 [package]
 name = "pixel-slime-pomodoro"
 version = "1.0.0"
@@ -7,8 +8,6 @@ edition = "2021"
 rust-version = "1.77"
 
 [lib]
-# The `_lib` suffix keeps the library name distinct from the binary on
-# platforms that don't allow two crates sharing one name (notably Windows).
 name = "pixel_slime_pomodoro_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
@@ -21,10 +20,12 @@ tauri-plugin-fs = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-positioner = "2"
 tauri-plugin-single-instance = "2"
-tauri-plugin-global-shortcut = "2"   # new — emergency unpin shortcut
+tauri-plugin-global-shortcut = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
+# This block was accidentally dropped in an earlier edit — restored here.
+# window-state isn't supported on mobile targets, hence the cfg gate.
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-window-state = "2"
 

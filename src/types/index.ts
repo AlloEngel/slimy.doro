@@ -1,5 +1,4 @@
 export type TimerMode = "focus" | "short-break" | "long-break";
-
 export type SlimeState = "idle" | "walk" | "jump" | "death" | "sleep";
 
 export interface Task {
@@ -10,14 +9,11 @@ export interface Task {
   createdAt: number;
 }
 
-export type OpacityPreset = 20 | 40 | 60 | 80;
+// Now a free-form percentage (20-100), not a fixed preset — driven by
+// the Settings slider. Clamping happens in the store's setOpacity.
+export type OpacityPreset = number;
 
-export type SnapPosition =
-    | "top-left"
-    | "top-right"
-    | "bottom-left"
-    | "bottom-right"
-    | "center";
+export type SnapPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
 
 export interface TimerSettings {
   focusMinutes: number;
@@ -55,11 +51,11 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
   cyclesBeforeLongBreak: 4,
-  autoStartNext: true, // was false — sessions now chain automatically
+  autoStartNext: true,
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  opacity: 80,
+  opacity: 100, // solid by default — no more translucent-on-first-launch
   showTodo: true,
   soundEnabled: true,
   notificationsEnabled: true,
