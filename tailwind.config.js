@@ -5,39 +5,50 @@ export default {
   theme: {
     extend: {
       colors: {
-        // RPG/fantasy slime palette — same token names as before,
-        // new values, so existing className usage repaints for free.
+        // Blue slime palette — keeps existing token names
+        // so existing className usage continues to work.
         cream: {
-          DEFAULT: "#F1F5F9", // near-white, used as light text on accent buttons
-          soft: "#1F2530",    // dark soft surface
+          DEFAULT: "#F1F5F9",
+          soft: "#253A5E",
         },
+
         terracotta: {
-          DEFAULT: "#38EF7D", // neon slime green — primary accent
-          dim: "#16A34A",
-          bright: "#6EE7B7",
+          DEFAULT: "#73BED3",
+          dim: "#4F8FBA",
+          bright: "#A4DDDB",
         },
+
         slate: {
-          text: "#94A3B8", // muted light gray for secondary text on dark bg
-          deep: "#F1F5F9", // near-white for headings/primary text
+          text: "#94A3B8",
+          deep: "#F1F5F9",
         },
+
         slime: {
-          900: "#0B1420",
-          700: "#16A34A",
-          500: "#38EF7D",
-          300: "#6EE7B7",
-          100: "#B9F5D8",
-          50: "#E6FBF0",
+          900: "#172038",
+          700: "#3C5E8B",
+          500: "#73BED3",
+          300: "#A4DDDB",
+          100: "#A4DDDB",
+          50: "#E7F7F7",
         },
-        contrast: { light: "#FFFFFF", dark: "#1E1E1E" },
+
+        contrast: {
+          light: "#FFFFFF",
+          dark: "#172038",
+        },
       },
+
       fontFamily: {
         display: ["'Pixelify Sans'", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "'IBM Plex Mono'", "ui-monospace", "monospace"],
-        // Body/base font is now Pixelify Sans globally, per requirement #4.
         body: ["'Pixelify Sans'", "cursive", "sans-serif"],
         sans: ["'Pixelify Sans'", "cursive", "sans-serif"],
       },
-      borderRadius: { cozy: "18px" },
+
+      borderRadius: {
+        cozy: "18px",
+      },
+
       keyframes: {
         "float-up": {
           "0%": { transform: "translateY(0)", opacity: "0" },
@@ -54,6 +65,7 @@ export default {
           "100%": { transform: "translateX(0)" },
         },
       },
+
       animation: {
         "float-up": "float-up 1.4s ease-out forwards",
         "pop-in": "pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",

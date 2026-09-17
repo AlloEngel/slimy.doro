@@ -3,13 +3,15 @@
 @tailwind utilities;
 
 :root {
-  /* Deep fantasy dark surface + slime-green accent (RPG theme) */
-  --surface: #161a23;
-  --surface-soft: #1f2530;
-  --accent: #38ef7d;
-  --accent-dim: #22c55e;
+  /* Deep blue slime palette */
+  --surface: #172038;
+  --surface-soft: #253a5e;
+  --accent: #73bed3;
+  --accent-dim: #4f8fba;
   --text: #cbd5e1;
   --text-deep: #f1f5f9;
+  --on-accent: #172038;
+
   color-scheme: dark;
 }
 

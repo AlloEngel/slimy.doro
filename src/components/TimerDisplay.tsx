@@ -55,10 +55,10 @@ export function TimerDisplay() {
         <button
           type="button"
           onClick={startPause}
-          className="flex h-14 w-40 items-center justify-center gap-2 rounded-full bg-slate-deep font-mono text-sm font-bold uppercase tracking-wide text-cream shadow-[0_6px_16px_rgba(51,59,77,0.28)] transition hover:brightness-110 active:scale-[0.98]"
+          className="flex h-16 w-44 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--accent)] font-mono text-base font-bold uppercase tracking-wide text-[var(--on-accent)] shadow-[0_6px_16px_rgba(51,59,77,0.28)] transition hover:brightness-110 active:scale-[0.98]"
           aria-label={isRunning ? "Pause session" : "Start session"}
         >
-          {isRunning ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
+          {isRunning ? <Pause size={17} fill="currentColor" /> : <Play size={17} fill="currentColor" />}
           {isRunning ? "Pause" : "Start Session"}
         </button>
 
