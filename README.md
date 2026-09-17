@@ -96,7 +96,7 @@ Frames render on a `<canvas>` with `image-rendering: pixelated`, driven by a `re
 - **Snap positions** — corner/center snapping from Settings → Window position.
 - **Emergency unpin shortcut** — Ctrl+Shift+U (Cmd+Shift+U on macOS).
 
-## Contributing
+## Contributing 
 
 Issues and PRs are welcome. If you're adding a new slime animation state, check `lib/sprites.ts` first — frame size and sheet layout are all defined there.
 

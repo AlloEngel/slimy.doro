@@ -32,6 +32,15 @@ body,
   image-rendering: crisp-edges;
 }
 
+/* Components scaling now works based on app window size
+   */
+.app-scale {
+  width: 100%;
+  height: 100%;
+  transform: scale(0.7);
+  transform-origin: top left;
+}
+
 /* Both branches now assume a dark surface — "dark" mode uses the
    theme's own light text color, "light" mode is a universal white
    with shadow for when the surface is mostly transparent and an
