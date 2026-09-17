@@ -88,7 +88,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
             data-no-drag
         >
             <div className="flex items-center justify-between">
-                <h2 className="font-display text-[10px] text-[var(--text-deep)]">Settings</h2>
+                <h2 className="font-display text-xs text-[var(--text-deep)]">Settings</h2>
                 <button
                     type="button"
                     onClick={onClose}
@@ -100,16 +100,16 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
             </div>
 
             {/* Always on Top — first item, per requirement #3 */}
-            <section className="rounded-lg bg-white/5 px-1 py-2 text-[11px] text-slate-text hover:bg-white/10">
+            <section className="rounded-lg  px-1 py-2 text-xs text-slate-text hover:bg-white/5">
                 <Toggle checked={settings.alwaysOnTop} onChange={toggleAlwaysOnTop} label="Always on top" />
             </section>
 
             <section>
                 <div className="mb-1 flex items-center justify-between">
-                    <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
+                    <h3 className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
                         Transparency
                     </h3>
-                    <span className="font-mono text-[10px] text-[var(--text)]/70">{settings.opacity}%</span>
+                    <span className="font-mono text-xs text-[var(--text)]/70">{settings.opacity}%</span>
                 </div>
                 <input
                     type="range"
@@ -124,7 +124,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
             </section>
 
             <section>
-                <h3 className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
+                <h3 className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
                     Window position
                 </h3>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -133,7 +133,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                             key={pos.id}
                             type="button"
                             onClick={() => void snapWindow(pos.id)}
-                            className="rounded-lg bg-white/5 py-1.5 text-[10px] text-[var(--text)] hover:bg-white/10"
+                            className="rounded-lg bg-white/5 py-1.5 text-xs text-[var(--text)] hover:bg-white/10"
                         >
                             {pos.label}
                         </button>
@@ -152,7 +152,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
             </section>
 
             <section>
-                <h3 className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
+                <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
                     Timer durations (minutes)
                 </h3>
                 <NumberField
