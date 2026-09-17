@@ -13,18 +13,21 @@ const SNAP_POSITIONS: { id: SnapPosition; label: string }[] = [
 
 function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
     return (
-        <label className="flex cursor-pointer items-center justify-between py-1.5 text-[12px] text-current/90">
+        // Toggle
+        <label className="flex cursor-pointer items-center justify-between py-2 text-[13px] text-current/90">
             <span>{label}</span>
             <button
                 type="button"
                 role="switch"
                 aria-checked={checked}
                 onClick={onChange}
-                className={`relative h-5 w-9 rounded-full transition ${checked ? "bg-[var(--accent)]" : "bg-white/15"}`}
+                className={`relative h-6 w-11 rounded-full transition ${
+                    checked ? "bg-[var(--accent)]" : "bg-white/15"
+                }`}
             >
         <span
-            className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition ${
-                checked ? "left-[18px]" : "left-0.5"
+            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                checked ? "left-[22px]" : "left-0.5"
             }`}
         />
             </button>
@@ -46,7 +49,7 @@ function NumberField({
     max?: number;
 }) {
     return (
-        <label className="flex items-center justify-between py-1 text-[12px] text-current/90">
+        <label className="flex items-center justify-between py-1.5 text-[13px] text-current/90">
             <span>{label}</span>
             <input
                 type="number"
@@ -57,7 +60,7 @@ function NumberField({
                     const n = Number(e.target.value);
                     if (!Number.isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
                 }}
-                className="w-14 rounded-md bg-white/10 px-2 py-1 text-right font-mono text-[12px] text-current focus:bg-white/15 focus:outline-none"
+                className="w-16 rounded-md bg-white/10 px-2 py-1.5 text-right font-mono text-[13px] text-current focus:bg-white/15 focus:outline-none"
             />
         </label>
     );
@@ -97,7 +100,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
             </div>
 
             {/* Always on Top — first item, per requirement #3 */}
-            <section className="rounded-lg bg-white/5 px-2.5 py-1">
+            <section className="rounded-lg bg-white/5 px-1 py-2 text-[11px] text-slate-text hover:bg-white/10">
                 <Toggle checked={settings.alwaysOnTop} onChange={toggleAlwaysOnTop} label="Always on top" />
             </section>
 
