@@ -26,8 +26,10 @@ function ControlButton({
             aria-label={label}
             title={label}
             data-no-drag
-            className={`flex h-7 w-7 items-center justify-center rounded-full transition active:scale-90 ${
-                active ? "bg-terracotta text-[#0B1420]" : "bg-white/10 text-current hover:bg-white/15"
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition active:scale-90 ${
+                active
+                    ? "bg-[var(--accent)] text-[var(--on-accent)]"
+                    : "bg-white/10 text-current hover:bg-white/15"
             }`}
         >
             {children}
@@ -38,25 +40,33 @@ function ControlButton({
 export function TitleBarControls({ pinned, onTogglePin, onOpenSettings }: Props) {
     return (
         <>
-            <div className="absolute left-3 top-3 z-20" data-no-drag>
+            <div className="absolute left-3 top-3 z-20 flex items-center gap-1.5" data-no-drag>
                 <ControlButton
                     label={pinned ? "Unpin (disable click-through)" : "Pin window (click-through)"}
                     onClick={onTogglePin}
                     active={pinned}
                 >
-                    {pinned ? <PinOff size={14} /> : <Pin size={14} />}
+                    {pinned ? <PinOff size={18} /> : <Pin size={18} />}
                 </ControlButton>
+
+                {pinned && (
+                    <span className="font-mono text-[9px] leading-none text-[var(--text)]">
+                        Unlock: Ctrl+Shift+U
+                    </span>
+                )}
             </div>
 
             <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5" data-no-drag>
                 <ControlButton label="Settings" onClick={onOpenSettings}>
-                    <Settings size={14} />
+                    <Settings size={18} />
                 </ControlButton>
+
                 <ControlButton label="Minimize" onClick={() => void minimizeApp()}>
-                    <Minus size={14} />
+                    <Minus size={18} />
                 </ControlButton>
+
                 <ControlButton label="Close" onClick={() => void closeApp()}>
-                    <X size={14} />
+                    <X size={18} />
                 </ControlButton>
             </div>
         </>

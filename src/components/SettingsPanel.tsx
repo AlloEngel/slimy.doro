@@ -11,25 +11,35 @@ const SNAP_POSITIONS: { id: SnapPosition; label: string }[] = [
     { id: "bottom-right", label: "Bottom right" },
 ];
 
-function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
+function Toggle({
+                    checked,
+                    onChange,
+                    label,
+                }: {
+    checked: boolean;
+    onChange: () => void;
+    label: string;
+}) {
     return (
-        // Toggle
-        <label className="flex cursor-pointer items-center justify-between py-2 text-sm text-current/90">
+        <label className="flex cursor-pointer items-center justify-between py-2 text-sm text-[var(--text-deep)]">
             <span>{label}</span>
+
             <button
                 type="button"
                 role="switch"
                 aria-checked={checked}
                 onClick={onChange}
-                className={`relative h-6 w-11 rounded-full transition ${
-                    checked ? "bg-[var(--accent)]" : "bg-white/15"
+                className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                    checked
+                        ? "bg-[var(--accent)]"
+                        : "bg-white/15 hover:bg-white/20"
                 }`}
             >
-        <span
-            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
-                checked ? "left-[22px]" : "left-0.5"
-            }`}
-        />
+                <span
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                        checked ? "left-[22px]" : "left-0.5"
+                    }`}
+                />
             </button>
         </label>
     );
@@ -49,8 +59,9 @@ function NumberField({
     max?: number;
 }) {
     return (
-        <label className="flex items-center justify-between py-1.5 text-sm text-current/90">
+        <label className="flex items-center justify-between py-1.5 text-sm text-[var(--text-deep)]">
             <span>{label}</span>
+
             <input
                 type="number"
                 min={min}
@@ -58,9 +69,12 @@ function NumberField({
                 value={value}
                 onChange={(e) => {
                     const n = Number(e.target.value);
-                    if (!Number.isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
+
+                    if (!Number.isNaN(n)) {
+                        onChange(Math.min(max, Math.max(min, n)));
+                    }
                 }}
-                className="w-16 rounded-md bg-white/10 px-2 py-1.5 text-right font-mono text-[13px] text-current focus:bg-white/15 focus:outline-none"
+                className="w-16 rounded-md bg-white/10 px-2 py-1.5 text-right font-mono text-[13px] text-[var(--text-deep)] focus:bg-white/15 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
             />
         </label>
     );
@@ -82,35 +96,49 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
 
     return (
         <div
-            // Fixed, fully opaque dark surface — independent of the user's
+            // Fixed, fully opaque surface — independent of the user's
             // transparency slider, so Settings can never bleed content through.
-            className="absolute inset-0 z-30 flex flex-col gap-3 overflow-y-auto rounded-cozy bg-[#12151d] p-4 text-[var(--text-deep)] shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
+            className="absolute inset-0 z-30 flex flex-col gap-3 overflow-y-auto rounded-cozy bg-[var(--surface)] p-4 text-[var(--text-deep)] shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
             data-no-drag
         >
+            {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="font-display text-xs text-[var(--text-deep)]">Settings</h2>
+                <h2 className="font-display text-sm font-bold text-[var(--text-deep)]">
+                    Settings
+                </h2>
+
                 <button
                     type="button"
                     onClick={onClose}
                     aria-label="Close settings"
-                    className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-[var(--text)] hover:bg-white/15"
+                    title="Close settings"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[var(--text)] transition hover:bg-white/15 active:scale-90"
                 >
-                    <X size={13} />
+                    <X size={18} />
                 </button>
             </div>
 
-            {/* Always on Top — first item, per requirement #3 */}
-            <section className="rounded-lg  px-1 py-2 text-xs text-slate-text hover:bg-white/5">
-                <Toggle checked={settings.alwaysOnTop} onChange={toggleAlwaysOnTop} label="Always on top" />
+            {/* Always on Top */}
+            <section className="rounded-lg px-1 py-2 text-sm transition hover:bg-white/5">
+                <Toggle
+                    checked={settings.alwaysOnTop}
+                    onChange={toggleAlwaysOnTop}
+                    label="Always on top"
+                />
             </section>
 
+            {/* Transparency */}
             <section>
-                <div className="mb-1 flex items-center justify-between">
-                    <h3 className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
+                <div className="mb-1.5 flex items-center justify-between">
+                    <h3 className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]">
                         Transparency
                     </h3>
-                    <span className="font-mono text-xs text-[var(--text)]/70">{settings.opacity}%</span>
+
+                    <span className="font-mono text-xs text-[var(--text)]">
+                        {settings.opacity}%
+                    </span>
                 </div>
+
                 <input
                     type="range"
                     min={20}
@@ -123,17 +151,19 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                 />
             </section>
 
+            {/* Window Position */}
             <section>
-                <h3 className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
+                <h3 className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]">
                     Window position
                 </h3>
+
                 <div className="grid grid-cols-3 gap-1.5">
                     {SNAP_POSITIONS.map((pos) => (
                         <button
                             key={pos.id}
                             type="button"
                             onClick={() => void snapWindow(pos.id)}
-                            className="rounded-lg bg-white/5 py-1.5 text-xs text-[var(--text)] hover:bg-white/10"
+                            className="rounded-lg bg-white/5 px-1 py-2 text-xs text-[var(--text-deep)] transition hover:bg-white/10 active:scale-[0.98]"
                         >
                             {pos.label}
                         </button>
@@ -141,9 +171,20 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                 </div>
             </section>
 
-            <section className="divide-y divide-white/5">
-                <Toggle checked={settings.showTodo} onChange={toggleShowTodo} label="Show to-do list" />
-                <Toggle checked={settings.soundEnabled} onChange={toggleSound} label="Chiptune sound effects" />
+            {/* General Toggles */}
+            <section className="divide-y divide-white/10">
+                <Toggle
+                    checked={settings.showTodo}
+                    onChange={toggleShowTodo}
+                    label="Show to-do list"
+                />
+
+                <Toggle
+                    checked={settings.soundEnabled}
+                    onChange={toggleSound}
+                    label="Chiptune sound effects"
+                />
+
                 <Toggle
                     checked={settings.notificationsEnabled}
                     onChange={toggleNotifications}
@@ -151,50 +192,73 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                 />
             </section>
 
+            {/* Timer Durations */}
             <section>
-                <h3 className="mb-1 font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
+                <h3 className="mb-1.5 font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--text)]">
                     Timer durations (minutes)
                 </h3>
+
                 <NumberField
                     label="Focus"
                     value={settings.timer.focusMinutes}
-                    onChange={(n) => updateTimerSettings({ focusMinutes: n })}
+                    onChange={(n) =>
+                        updateTimerSettings({ focusMinutes: n })
+                    }
                 />
+
                 <NumberField
                     label="Short break"
                     value={settings.timer.shortBreakMinutes}
-                    onChange={(n) => updateTimerSettings({ shortBreakMinutes: n })}
+                    onChange={(n) =>
+                        updateTimerSettings({ shortBreakMinutes: n })
+                    }
                 />
+
                 <NumberField
                     label="Long break"
                     value={settings.timer.longBreakMinutes}
-                    onChange={(n) => updateTimerSettings({ longBreakMinutes: n })}
+                    onChange={(n) =>
+                        updateTimerSettings({ longBreakMinutes: n })
+                    }
                 />
+
                 <NumberField
                     label="Focus cycles before long break"
                     value={settings.timer.cyclesBeforeLongBreak}
-                    onChange={(n) => updateTimerSettings({ cyclesBeforeLongBreak: n })}
+                    onChange={(n) =>
+                        updateTimerSettings({
+                            cyclesBeforeLongBreak: n,
+                        })
+                    }
                     min={1}
                     max={12}
                 />
+
                 <Toggle
                     checked={settings.timer.autoStartNext}
-                    onChange={() => updateTimerSettings({ autoStartNext: !settings.timer.autoStartNext })}
+                    onChange={() =>
+                        updateTimerSettings({
+                            autoStartNext: !settings.timer.autoStartNext,
+                        })
+                    }
                     label="Auto-start next session"
                 />
             </section>
 
+            {/* Force Unpin */}
             <section className="rounded-lg bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] p-2.5">
                 <button
                     type="button"
                     onClick={onForceUnpin}
                     className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--accent)] py-2 text-xs font-bold uppercase tracking-wide text-[var(--on-accent)] transition hover:brightness-105 active:scale-[0.98]"
                 >
-                    <ShieldAlert size={13} />
+                    <ShieldAlert size={16} />
                     Force Unpin Window
                 </button>
-                <p className="mt-1.5 text-center text-xs text-[var(--text)]/60">
-                    Also available via tray menu, or Ctrl+Shift+U (Cmd+Shift+U on macOS)
+
+                <p className="mt-1.5 text-center text-xs leading-relaxed text-[var(--text)]">
+                    Also available via tray menu, or Ctrl+Shift+U
+                    (Cmd+Shift+U on macOS)
                 </p>
             </section>
         </div>
