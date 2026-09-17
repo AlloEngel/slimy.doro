@@ -14,7 +14,7 @@ const SNAP_POSITIONS: { id: SnapPosition; label: string }[] = [
 function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
     return (
         // Toggle
-        <label className="flex cursor-pointer items-center justify-between py-2 text-[13px] text-current/90">
+        <label className="flex cursor-pointer items-center justify-between py-2 text-sm text-current/90">
             <span>{label}</span>
             <button
                 type="button"
@@ -49,7 +49,7 @@ function NumberField({
     max?: number;
 }) {
     return (
-        <label className="flex items-center justify-between py-1.5 text-[13px] text-current/90">
+        <label className="flex items-center justify-between py-1.5 text-sm text-current/90">
             <span>{label}</span>
             <input
                 type="number"
@@ -188,14 +188,13 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                 <button
                     type="button"
                     onClick={onForceUnpin}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--accent)] py-2 text-[11px] font-bold uppercase tracking-wide text-[var(--on-accent)] transition hover:brightness-105 active:scale-[0.98]"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--accent)] py-2 text-xs font-bold uppercase tracking-wide text-[var(--on-accent)] transition hover:brightness-105 active:scale-[0.98]"
                 >
                     <ShieldAlert size={13} />
                     Force Unpin Window
                 </button>
-                <p className="mt-1.5 text-center text-[10px] text-[var(--text)]/60">
+                <p className="mt-1.5 text-center text-xs text-[var(--text)]/60">
                     Also available via tray menu, or Ctrl+Shift+U (Cmd+Shift+U on macOS)
-                    — works even if the window is stuck click-through.
                 </p>
             </section>
         </div>
