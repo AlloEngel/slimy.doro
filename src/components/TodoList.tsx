@@ -53,7 +53,7 @@ export function TodoList() {
           Tasks
         </span>
                 <span
-                    className={`font-mono text-[9px] ${atLimit ? "font-bold text-terracotta" : "text-current/50"}`}
+                    className={`font-mono text-[9px] ${atLimit ? "font-bold text-[var(--accent)]" : "text-current/50"}`}
                 >
           {tasks.length}/{MAX_TASKS}
         </span>
@@ -71,14 +71,14 @@ export function TodoList() {
                     type="submit"
                     disabled={atLimit || !draft.trim()}
                     aria-label="Add task"
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-terracotta text-cream transition hover:brightness-105 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--accent)] text-[var(--on-accent)] transition hover:brightness-105 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
                 >
                     <Plus size={13} strokeWidth={3} />
                 </button>
             </form>
 
             {atLimit && (
-                <p className="-mt-1 text-[10px] italic text-terracotta/90">
+                <p className="-mt-1 text-[10px] italic text-[var(--accent)]/90">
                     10-task limit reached — finish or remove one to add more.
                 </p>
             )}
@@ -101,7 +101,9 @@ export function TodoList() {
                             onClick={() => toggleTaskDone(task.id)}
                             aria-label={`Mark "${task.title}" ${task.done ? "not done" : "done"}`}
                             className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-[4px] border transition ${
-                                task.done ? "border-terracotta bg-terracotta" : "border-current/40 hover:border-terracotta"
+                                task.done
+                                    ? "border-[var(--accent)] bg-[var(--accent)]"
+                                    : "border-current/40 hover:border-[var(--accent)]"
                             }`}
                         />
 
@@ -133,14 +135,16 @@ export function TodoList() {
                         >
                             <Star
                                 size={11}
-                                className={task.favorite ? "fill-terracotta text-terracotta opacity-100" : "text-current/50"}
+                                className={task.favorite
+                                    ? "fill-[var(--accent)] text-[var(--accent)] opacity-100"
+                                    : "text-current/50"}
                             />
                         </button>
                         <button
                             type="button"
                             onClick={() => deleteTask(task.id)}
                             aria-label="Delete task"
-                            className="opacity-0 text-current/50 transition hover:text-terracotta group-hover:opacity-100"
+                            className="opacity-0 text-current/50 transition hover:text-[var(--accent)] group-hover:opacity-100"
                         >
                             <Trash2 size={11} />
                         </button>

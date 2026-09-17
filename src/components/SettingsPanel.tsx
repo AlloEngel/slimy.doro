@@ -20,7 +20,7 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () =
                 role="switch"
                 aria-checked={checked}
                 onClick={onChange}
-                className={`relative h-5 w-9 rounded-full transition ${checked ? "bg-terracotta" : "bg-white/15"}`}
+                className={`relative h-5 w-9 rounded-full transition ${checked ? "bg-[var(--accent)]" : "bg-white/15"}`}
             >
         <span
             className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition ${
@@ -81,16 +81,16 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
         <div
             // Fixed, fully opaque dark surface — independent of the user's
             // transparency slider, so Settings can never bleed content through.
-            className="absolute inset-0 z-30 flex flex-col gap-3 overflow-y-auto rounded-cozy bg-[#12151d] p-4 text-slate-deep shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
+            className="absolute inset-0 z-30 flex flex-col gap-3 overflow-y-auto rounded-cozy bg-[#12151d] p-4 text-[var(--text-deep)] shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
             data-no-drag
         >
             <div className="flex items-center justify-between">
-                <h2 className="font-display text-[10px] text-slate-deep">Settings</h2>
+                <h2 className="font-display text-[10px] text-[var(--text-deep)]">Settings</h2>
                 <button
                     type="button"
                     onClick={onClose}
                     aria-label="Close settings"
-                    className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-slate-text hover:bg-white/15"
+                    className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-[var(--text)] hover:bg-white/15"
                 >
                     <X size={13} />
                 </button>
@@ -103,10 +103,10 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
 
             <section>
                 <div className="mb-1 flex items-center justify-between">
-                    <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-text/70">
+                    <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
                         Transparency
                     </h3>
-                    <span className="font-mono text-[10px] text-slate-text/70">{settings.opacity}%</span>
+                    <span className="font-mono text-[10px] text-[var(--text)]/70">{settings.opacity}%</span>
                 </div>
                 <input
                     type="range"
@@ -115,13 +115,13 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                     step={5}
                     value={settings.opacity}
                     onChange={(e) => setOpacity(Number(e.target.value))}
-                    className="w-full accent-terracotta"
+                    className="w-full accent-[var(--accent)]"
                     aria-label="Window opacity"
                 />
             </section>
 
             <section>
-                <h3 className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-text/70">
+                <h3 className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
                     Window position
                 </h3>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -130,7 +130,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                             key={pos.id}
                             type="button"
                             onClick={() => void snapWindow(pos.id)}
-                            className="rounded-lg bg-white/5 py-1.5 text-[10px] text-slate-text hover:bg-white/10"
+                            className="rounded-lg bg-white/5 py-1.5 text-[10px] text-[var(--text)] hover:bg-white/10"
                         >
                             {pos.label}
                         </button>
@@ -149,7 +149,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
             </section>
 
             <section>
-                <h3 className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-text/70">
+                <h3 className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text)]/70">
                     Timer durations (minutes)
                 </h3>
                 <NumberField
@@ -181,16 +181,16 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                 />
             </section>
 
-            <section className="rounded-lg bg-terracotta/10 p-2.5">
+            <section className="rounded-lg bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] p-2.5">
                 <button
                     type="button"
                     onClick={onForceUnpin}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-md bg-terracotta py-2 text-[11px] font-bold uppercase tracking-wide text-[#0B1420] transition hover:brightness-105 active:scale-[0.98]"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--accent)] py-2 text-[11px] font-bold uppercase tracking-wide text-[var(--on-accent)] transition hover:brightness-105 active:scale-[0.98]"
                 >
                     <ShieldAlert size={13} />
                     Force Unpin Window
                 </button>
-                <p className="mt-1.5 text-center text-[10px] text-slate-text/60">
+                <p className="mt-1.5 text-center text-[10px] text-[var(--text)]/60">
                     Also available via tray menu, or Ctrl+Shift+U (Cmd+Shift+U on macOS)
                     — works even if the window is stuck click-through.
                 </p>
