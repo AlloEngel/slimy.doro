@@ -49,11 +49,11 @@ export function TodoList() {
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-2" data-no-drag>
             <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-current/80">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.15em] text-current/80">
           Tasks
         </span>
                 <span
-                    className={`font-mono text-[9px] ${atLimit ? "font-bold text-[var(--accent)]" : "text-current/50"}`}
+                    className={`font-mono text-xs ${atLimit ? "font-bold text-[var(--accent)]" : "text-current/50"}`}
                 >
           {tasks.length}/{MAX_TASKS}
         </span>
@@ -65,7 +65,7 @@ export function TodoList() {
                     onChange={(e) => setDraft(e.target.value)}
                     placeholder={atLimit ? "Task limit reached" : "Add a task..."}
                     disabled={atLimit}
-                    className="w-full min-w-0 rounded-md bg-black/5 px-2.5 py-1.5 text-[11px] text-current placeholder:text-current/40 focus:bg-black/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    className="w-full min-w-0 rounded-md bg-black/5 px-2.5 py-1.5 text-sm text-current placeholder:text-current/40 focus:bg-black/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <button
                     type="submit"
@@ -78,14 +78,14 @@ export function TodoList() {
             </form>
 
             {atLimit && (
-                <p className="-mt-1 text-[10px] italic text-[var(--accent)]/90">
+                <p className="-mt-1 text-xs italic text-[var(--accent)]/90">
                     10-task limit reached — finish or remove one to add more.
                 </p>
             )}
 
             <ul className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
                 {tasks.length === 0 && (
-                    <li className="pt-1 text-[11px] italic leading-snug text-current/50">
+                    <li className="pt-1 text-sm italic leading-snug text-current/50">
                         Nothing here yet — add your first task above.
                     </li>
                 )}
@@ -114,13 +114,13 @@ export function TodoList() {
                                 onChange={(e) => setEditValue(e.target.value)}
                                 onBlur={commitEdit}
                                 onKeyDown={(e) => e.key === "Enter" && commitEdit()}
-                                className="min-w-0 flex-1 rounded bg-black/5 px-1 text-[11px] text-current focus:outline-none"
+                                className="min-w-0 flex-1 rounded bg-black/5 px-1 text-sm text-current focus:outline-none"
                             />
                         ) : (
                             <button
                                 type="button"
                                 onDoubleClick={() => beginEdit(task)}
-                                className={`min-w-0 flex-1 text-left text-[11px] leading-snug text-current/90 ${task.done ? "line-through" : ""}`}
+                                className={`min-w-0 flex-1 text-left text-sm leading-snug text-current/90 ${task.done ? "line-through" : ""}`}
                                 title="Double-click to rename"
                             >
                                 {task.title}
@@ -134,7 +134,7 @@ export function TodoList() {
                             className="opacity-0 transition group-hover:opacity-100"
                         >
                             <Star
-                                size={11}
+                                size={14}
                                 className={task.favorite
                                     ? "fill-[var(--accent)] text-[var(--accent)] opacity-100"
                                     : "text-current/50"}
@@ -146,7 +146,7 @@ export function TodoList() {
                             aria-label="Delete task"
                             className="opacity-0 text-current/50 transition hover:text-[var(--accent)] group-hover:opacity-100"
                         >
-                            <Trash2 size={11} />
+                            <Trash2 size={14} />
                         </button>
                     </li>
                 ))}
