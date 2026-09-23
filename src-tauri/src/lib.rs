@@ -4,9 +4,12 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{Emitter, Manager};
 
-
-
-use tauri_plugin_global_shortcut::{Code, Modifiers, Shortcut, ShortcutState};
+use tauri_plugin_global_shortcut::{
+    Code,
+    Modifiers,
+    Shortcut,
+    ShortcutState,
+};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -14,12 +17,14 @@ pub fn run() {
 
     #[cfg(desktop)]
     {
-        builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.show();
-                let _ = window.set_focus();
-            }
-        }));
+        builder = builder.plugin(
+            tauri_plugin_single_instance::init(|app, _args, _cwd| {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }),
+        );
     }
 
     #[cfg(desktop)]
@@ -34,29 +39,42 @@ pub fn run() {
         );
     }
 
-    // Emergency unpin shortcut — Ctrl+Shift+U (Cmd+Shift+U on macOS).
-    // Registered directly on the plugin Builder via `.with_shortcut(...)`,
-    // matching Tauri's official example for this plugin — this is the
-    // form most likely to stay stable across 2.x point releases.
+    // Emergency unpin shortcut — Ctrl+Shift+U on Windows/Linux,
+    // Cmd+Shift+U on macOS.
     #[cfg(desktop)]
     {
         #[cfg(target_os = "macos")]
         let modifiers = Modifiers::SUPER | Modifiers::SHIFT;
+
         #[cfg(not(target_os = "macos"))]
         let modifiers = Modifiers::CONTROL | Modifiers::SHIFT;
 
-        let unpin_shortcut = Shortcut::new(Some(modifiers), Code::KeyU);
+        let unpin_shortcut = Shortcut::new(
+            Some(modifiers),
+            Code::KeyU,
+        );
 
         builder = builder.plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_shortcut(unpin_shortcut)
                 .expect("failed to register emergency-unpin shortcut")
                 .with_handler(move |app, scut, event| {
-                    if scut == &unpin_shortcut && event.state() == ShortcutState::Pressed {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.set_ignore_cursor_events(false);
-                            let _ = window.set_always_on_top(false);
-                            let _ = window.emit("shortcut://force-unpin", ());
+                    if scut == &unpin_shortcut
+                        && event.state() == ShortcutState::Pressed
+                    {
+                        if let Some(window) =
+                            app.get_webview_window("main")
+                        {
+                            let _ =
+                                window.set_ignore_cursor_events(false);
+
+                            let _ =
+                                window.set_always_on_top(false);
+
+                            let _ = window.emit(
+                                "shortcut://force-unpin",
+                                (),
+                            );
                         }
                     }
                 })
@@ -69,42 +87,74 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_positioner::init())
         .setup(|app| {
-            // --- Startup position: dock bottom-right on the primary monitor ---
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = commands::window::snap_window(
-                    window,
-                    commands::window::SnapPosition::BottomRight,
-                );
-            }
+            // Do not force a startup position here.
+            //
+            // tauri-plugin-window-state restores the last saved
+            // position and size. Forcing BottomRight here would
+            // overwrite the restored position on every launch.
 
             // --- System tray ---
-            let show_hide = MenuItem::with_id(app, "toggle-visibility", "Show / Hide", true, None::<&str>)?;
-            let pin = MenuItem::with_id(app, "toggle-pin", "Toggle Pin Mode", true, None::<&str>)?;
-            let quit = PredefinedMenuItem::quit(app, Some("Quit Pixel Slime Pomodoro"))?;
-            let tray_menu = Menu::with_items(app, &[&show_hide, &pin, &quit])?;
+            let show_hide = MenuItem::with_id(
+                app,
+                "toggle-visibility",
+                "Show / Hide",
+                true,
+                None::<&str>,
+            )?;
+
+            let pin = MenuItem::with_id(
+                app,
+                "toggle-pin",
+                "Toggle Pin Mode",
+                true,
+                None::<&str>,
+            )?;
+
+            let quit = PredefinedMenuItem::quit(
+                app,
+                Some("Quit Pixel Slime Pomodoro"),
+            )?;
+
+            let tray_menu = Menu::with_items(
+                app,
+                &[&show_hide, &pin, &quit],
+            )?;
 
             TrayIconBuilder::new()
                 .menu(&tray_menu)
                 .show_menu_on_left_click(true)
                 .icon(app.default_window_icon().unwrap().clone())
-                .on_menu_event(|app, event| match event.id.as_ref() {
-                    "toggle-visibility" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let visible = window.is_visible().unwrap_or(true);
-                            if visible {
-                                let _ = window.hide();
-                            } else {
-                                let _ = window.show();
-                                let _ = window.set_focus();
+                .on_menu_event(|app, event| {
+                    match event.id.as_ref() {
+                        "toggle-visibility" => {
+                            if let Some(window) =
+                                app.get_webview_window("main")
+                            {
+                                let visible =
+                                    window.is_visible().unwrap_or(true);
+
+                                if visible {
+                                    let _ = window.hide();
+                                } else {
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
+                                }
                             }
                         }
-                    }
-                    "toggle-pin" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.emit("tray://toggle-pin", ());
+
+                        "toggle-pin" => {
+                            if let Some(window) =
+                                app.get_webview_window("main")
+                            {
+                                let _ = window.emit(
+                                    "tray://toggle-pin",
+                                    (),
+                                );
+                            }
                         }
+
+                        _ => {}
                     }
-                    _ => {}
                 })
                 .build(app)?;
 
