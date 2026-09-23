@@ -86,21 +86,35 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_positioner::init())
-        .setup(|app| {
-            // Do not force a startup position here.
-            //
-            // tauri-plugin-window-state restores the last saved
-            // position and size. Forcing BottomRight here would
-            // overwrite the restored position on every launch.
+       .setup(|app| {
+           // Do not force a startup position here.
+           //
+           // tauri-plugin-window-state restores the last saved
+           // position and size. Forcing BottomRight here would
+           // overwrite the restored position on every launch.
 
-            // --- System tray ---
-            let show_hide = MenuItem::with_id(
-                app,
-                "toggle-visibility",
-                "Show / Hide",
-                true,
-                None::<&str>,
-            )?;
+           // --- Window icon ---
+           // Use the original high-resolution Tauri icon at runtime.
+           // This affects the Windows taskbar/window icon.
+           if let Some(window) = app.get_webview_window("main") {
+               let icon_bytes = include_bytes!("../icons/128x128.png");
+
+               let icon = tauri::image::Image::from_bytes(icon_bytes)
+                   .map_err(|e| e.to_string())?;
+
+               window
+                   .set_icon(icon)
+                   .map_err(|e| e.to_string())?;
+           }
+
+           // --- System tray ---
+           let show_hide = MenuItem::with_id(
+               app,
+               "toggle-visibility",
+               "Show / Hide",
+               true,
+               None::<&str>,
+           )?;
 
             let pin = MenuItem::with_id(
                 app,
