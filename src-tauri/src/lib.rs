@@ -179,6 +179,7 @@ pub fn run() {
             commands::window::set_always_on_top,
             commands::window::snap_window,
             commands::window::set_window_width,
+            commands::window::set_window_height,
             commands::window::start_drag,
             commands::window::move_window_by,
             commands::storage::read_json_file,

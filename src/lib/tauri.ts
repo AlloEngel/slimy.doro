@@ -39,6 +39,11 @@ export async function setWindowWidth(width: number): Promise<void> {
   await invoke("set_window_width", { width });
 }
 
+export async function setWindowHeight(height: number): Promise<void> {
+  if (!isTauri) return;
+  await invoke("set_window_height", { height });
+}
+
 /** Nudge the window position by a logical-pixel delta (used to keep the
  * to-do drawer's expansion visually anchored to the right edge). */
 export async function moveWindowBy(dx: number, dy: number): Promise<void> {

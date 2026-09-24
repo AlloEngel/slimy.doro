@@ -11,6 +11,7 @@ import { TitleBarControls } from "@/components/TitleBarControls";
 import { TodoList } from "@/components/TodoList";
 import { SettingsPanel } from "@/components/SettingsPanel";
 
+
 export default function App() {
     const hydrated = useAppStore((s) => s.hydrated);
     const hydrate = useAppStore((s) => s.hydrate);

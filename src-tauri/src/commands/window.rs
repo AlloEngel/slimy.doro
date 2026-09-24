@@ -135,6 +135,20 @@ pub fn set_window_width<R: Runtime>(
         .map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+pub fn set_window_height<R: Runtime>(
+    window: WebviewWindow<R>,
+    height: f64,
+) -> Result<(), String> {
+    let size = window
+        .outer_size()
+        .map_err(|e| e.to_string())?;
+
+    window
+        .set_size(PhysicalSize::new(size.width, height as u32))
+        .map_err(|e| e.to_string())
+}
+
 // Kept for compatibility with the existing frontend/command registration.
 #[tauri::command]
 pub fn start_drag<R: Runtime>(
