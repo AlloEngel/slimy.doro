@@ -14,9 +14,9 @@ import { TitleBarControls } from "@/components/TitleBarControls";
 import { TodoList } from "@/components/TodoList";
 import { SettingsPanel } from "@/components/SettingsPanel";
 
-const NATIVE_WIDTH = 189;
-const NATIVE_HEIGHT_WITH_TODO = 228;
-const NATIVE_HEIGHT_WITHOUT_TODO = 189;
+const NATIVE_WIDTH = 231;
+const NATIVE_HEIGHT_WITH_TODO = 382;
+const NATIVE_HEIGHT_WITHOUT_TODO = 230;
 
 export default function App() {
     const hydrated = useAppStore((s) => s.hydrated);
@@ -24,6 +24,7 @@ export default function App() {
     const settings = useAppStore((s) => s.settings);
 
     const [settingsOpen, setSettingsOpen] = useState(false);
+
     const { pinned, togglePin, setPin } = useClickThrough();
     const handleDragStart = useWindowDrag();
 
@@ -33,13 +34,6 @@ export default function App() {
         void hydrate();
     }, [hydrate]);
 
-    /*
-     * Keep the native Tauri window synchronized with the visible
-     * 70%-scaled layout.
-     *
-     * This runs after hydration so the persisted To-Do preference
-     * determines the initial native height.
-     */
     useEffect(() => {
         if (!hydrated) return;
 
@@ -83,7 +77,7 @@ export default function App() {
                 {!settingsOpen && (
                     <div className="flex h-full w-full flex-col gap-2 px-4 pb-2 pt-8">
                         <div
-                            className={`flex flex-col items-center gap-1 ${
+                            className={`flex min-h-0 flex-col items-center gap-1 ${
                                 !settings.showTodo
                                     ? "flex-1 justify-center"
                                     : ""

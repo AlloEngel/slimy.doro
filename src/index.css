@@ -44,14 +44,14 @@ body,
  * exactly the 189px native window.
  */
 .app-scale {
-  width: 270px;
-  height: 326px;
+  width: 330px;
+  height: 546px;
   zoom: 0.7;
 }
 
 .app-scale-no-todo {
-  width: 270px;
-  height: 270px;
+  width: 330px;
+  height: 329px;
   zoom: 0.7;
 }
 
