@@ -1,12 +1,12 @@
 # Slimy.doro 🟦
 
-A tiny desktop companion for people who can't stare at a bare countdown timer for 25 minutes straight. Slimy.doro is a frameless, transparent Pomodoro overlay with a pixel-art slime that reacts to what you're doing — it walks while you focus, dozes off on breaks, and does a little jump when you finish a task. Built with Tauri v2 + React + TypeScript because I wanted something native, lightweight, and not another Electron memory hog.
+A tiny desktop companion for people who can't stare at a bare countdown timer for 25 minutes straight. Slimy.doro is a frameless, transparent Pomodoro overlay with a pixel-art slime that reacts to what you're doing — it walks while you focus, dozes off on breaks, and does a little jump when you finish a task. Built with Tauri v2 + React + TypeScript because I wanted something native, lightweight, and not another Electron memory hog (skill issue, shame on me).
 
 Open source, MIT licensed, PRs welcome.
 
 ## Why
 
-Every Pomodoro app I tried was either too plain or too bloated. I wanted a widget I could pin in a corner, forget about, and glance at — something that felt more like a pet than a productivity tool.
+Every Pomodoro app I tried was either too plain or too bloated. I wanted a widget I could pin in a corner, forget about, and glance at — something that felt more like a companion buddy than a productivity tool.
 
 ## Requirements
 
@@ -43,9 +43,9 @@ tauri.conf.json transparent/frameless window config
 
 src/ React frontend
 components/ SlimeStage, TimerDisplay, TitleBarControls,
-TodoCompact, SettingsPanel
+TodoList, SettingsPanel
 hooks/ sprite animation loop, pomodoro ticker, drag,
-click-through sync, drawer resize sync
+click-through sync
 store/useAppStore.ts settings, tasks, timer state machine (zustand)
 lib/ tauri command wrappers, chiptune SFX synth,
 sprite sheet metadata, theme helpers
@@ -94,11 +94,21 @@ Frames render on a `<canvas>` with `image-rendering: pixelated`, driven by a `re
 
 - **Pin mode** (top-left icon) — click-through so it sits over whatever you're working in. Since a pinned window can't receive the click to unpin itself, use the tray menu's "Toggle Pin Mode" if you get stuck.
 - **Snap positions** — corner/center snapping from Settings → Window position.
-- **Emergency unpin shortcut** — Ctrl+Shift+U (Cmd+Shift+U on macOS).
+- **Emergency unpin shortcut (IMPORTANT)** — Ctrl+Shift+U (Cmd+Shift+U on macOS).
 
 ## Contributing 
 
-Issues and PRs are welcome. If you're adding a new slime animation state, check `lib/sprites.ts` first — frame size and sheet layout are all defined there.
+Issues and PRs are welcome! If you're adding a new animation state, check `lib/sprites.ts` first — frame size and sheet layout are defined there.
+
+Here are a few areas where ideas, experiments, and contributions are especially welcome:
+
+* **Pinned window:** ideas for keeping the Pin button interactive while the rest of the pinned window remains click-through. The Emergency Unpin shortcut is currently the only reliable solution.
+* **Accessibility:** suggestions for improving readability, especially around font sizes, contrast, and keyboard accessibility.
+* **To-Do UX:** ideas for making task creation, editing, ordering, and everyday use smoother.
+* **Window resizing:** new approaches for customizable window sizes and scaling.
+* **Companions:** ideas for modularizing the sprite and animation system so new companions can be added more easily.
+
+For larger changes, opening an issue first is encouraged. Keep PRs focused and avoid unrelated refactors.
 
 ## License
 
