@@ -1,16 +1,22 @@
-
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { usePomodoroTicker } from "@/hooks/usePomodoroTicker";
 import { useClickThrough } from "@/hooks/useClickThrough";
 import { useWindowDrag } from "@/hooks/useWindowDrag";
 import { resolveContrastMode, opacityToAlpha } from "@/lib/theme";
+import {
+    setWindowHeight,
+    setWindowWidth,
+} from "@/lib/tauri";
 import { SlimeStage } from "@/components/SlimeStage";
 import { TimerDisplay } from "@/components/TimerDisplay";
 import { TitleBarControls } from "@/components/TitleBarControls";
 import { TodoList } from "@/components/TodoList";
 import { SettingsPanel } from "@/components/SettingsPanel";
 
+const NATIVE_WIDTH = 189;
+const NATIVE_HEIGHT_WITH_TODO = 228;
+const NATIVE_HEIGHT_WITHOUT_TODO = 189;
 
 export default function App() {
     const hydrated = useAppStore((s) => s.hydrated);
@@ -27,6 +33,24 @@ export default function App() {
         void hydrate();
     }, [hydrate]);
 
+    /*
+     * Keep the native Tauri window synchronized with the visible
+     * 70%-scaled layout.
+     *
+     * This runs after hydration so the persisted To-Do preference
+     * determines the initial native height.
+     */
+    useEffect(() => {
+        if (!hydrated) return;
+
+        const height = settings.showTodo
+            ? NATIVE_HEIGHT_WITH_TODO
+            : NATIVE_HEIGHT_WITHOUT_TODO;
+
+        void setWindowWidth(NATIVE_WIDTH);
+        void setWindowHeight(height);
+    }, [hydrated, settings.showTodo]);
+
     if (!hydrated) {
         return <div className="h-full w-full bg-transparent" />;
     }
@@ -34,8 +58,12 @@ export default function App() {
     const contrastMode = resolveContrastMode(settings.opacity);
     const alpha = opacityToAlpha(settings.opacity);
 
+    const appScaleClass = settings.showTodo
+        ? "app-scale"
+        : "app-scale-no-todo";
+
     return (
-        <div className="app-scale">
+        <div className={appScaleClass}>
             <div
                 className={`relative h-full w-full overflow-hidden rounded-cozy contrast-${contrastMode}`}
                 style={{
@@ -53,14 +81,12 @@ export default function App() {
                 />
 
                 {!settingsOpen && (
-                    <div className="flex h-full w-full flex-col gap-3 px-3 pb-3 pt-10">
-                        {/* When the To-Do list is hidden, this block becomes flex-1 +
-                        justify-center so the slime/timer expand to fill the freed
-                        vertical space instead of leaving a blank gap below them.
-                        */}
+                    <div className="flex h-full w-full flex-col gap-2 px-4 pb-2 pt-8">
                         <div
-                            className={`flex flex-col items-center gap-2 ${
-                                !settings.showTodo ? "flex-1 justify-center" : ""
+                            className={`flex flex-col items-center gap-1 ${
+                                !settings.showTodo
+                                    ? "flex-1 justify-center"
+                                    : ""
                             }`}
                         >
                             <SlimeStage />

@@ -7,8 +7,15 @@ import {
 } from "@tauri-apps/plugin-notification";
 import type { SnapPosition } from "@/types";
 
-/** True when running inside the Tauri shell (vs. `vite dev` in a plain browser tab). */
-export const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+/**
+ * True when running inside the Tauri shell.
+ *
+ * During normal Vite/browser development, native Tauri commands
+ * are unavailable, so the frontend functions below simply return.
+ */
+export const isTauri =
+    typeof window !== "undefined" &&
+    "__TAURI_INTERNALS__" in window;
 
 const SNAP_MAP: Record<SnapPosition, string> = {
   "top-left": "top-left",
@@ -18,87 +25,223 @@ const SNAP_MAP: Record<SnapPosition, string> = {
   center: "center",
 };
 
-/** Toggle click-through "pin" mode + forced always-on-top. */
-export async function setPinMode(pinned: boolean): Promise<void> {
+/**
+ * Enable or disable Pin Mode.
+ *
+ * Pin Mode combines:
+ *
+ * - click-through behavior
+ * - always-on-top behavior
+ *
+ * The emergency unpin shortcut is handled natively by Rust.
+ */
+export async function setPinMode(
+    pinned: boolean,
+): Promise<void> {
   if (!isTauri) return;
+
   await invoke("set_pin_mode", { pinned });
 }
 
-export async function setAlwaysOnTop(enabled: boolean): Promise<void> {
+/**
+ * Change only the native Always on Top state.
+ *
+ * This is intentionally separate from Pin Mode because a window
+ * can be always-on-top without being click-through.
+ */
+export async function setAlwaysOnTop(
+    enabled: boolean,
+): Promise<void> {
   if (!isTauri) return;
+
   await invoke("set_always_on_top", { enabled });
 }
 
-export async function snapWindow(position: SnapPosition): Promise<void> {
+/**
+ * Snap the native window to one of the supported positions.
+ *
+ * The Rust implementation now works directly with the native
+ * window size because the native window and visible application
+ * have the same dimensions.
+ */
+export async function snapWindow(
+    position: SnapPosition,
+): Promise<void> {
   if (!isTauri) return;
-  await invoke("snap_window", { position: SNAP_MAP[position] });
+
+  await invoke("snap_window", {
+    position: SNAP_MAP[position],
+  });
 }
 
-export async function setWindowWidth(width: number): Promise<void> {
+/**
+ * Change the native window width while preserving its height.
+ *
+ * Current intended width:
+ *
+ *   189px
+ *
+ * This corresponds to the original 270px logical layout at 70%.
+ */
+export async function setWindowWidth(
+    width: number,
+): Promise<void> {
   if (!isTauri) return;
+
   await invoke("set_window_width", { width });
 }
 
-export async function setWindowHeight(height: number): Promise<void> {
+/**
+ * Change the native window height while preserving its width.
+ *
+ * Current intended heights:
+ *
+ *   224px → To-Do visible
+ *   175px → To-Do hidden
+ *
+ * These correspond to the original:
+ *
+ *   320px × 0.7 = 224px
+ *   250px × 0.7 = 175px
+ */
+export async function setWindowHeight(
+    height: number,
+): Promise<void> {
   if (!isTauri) return;
+
   await invoke("set_window_height", { height });
 }
 
-/** Nudge the window position by a logical-pixel delta (used to keep the
- * to-do drawer's expansion visually anchored to the right edge). */
-export async function moveWindowBy(dx: number, dy: number): Promise<void> {
+/**
+ * Nudge the native window position by a small amount.
+ *
+ * Kept for compatibility with existing window-position behavior.
+ */
+export async function moveWindowBy(
+    dx: number,
+    dy: number,
+): Promise<void> {
   if (!isTauri) return;
-  await invoke("move_window_by", { dx, dy });
+
+  await invoke("move_window_by", {
+    dx,
+    dy,
+  });
 }
 
+/**
+ * Start native Tauri window dragging.
+ */
 export async function startWindowDrag(): Promise<void> {
   if (!isTauri) return;
+
   await invoke("start_drag");
 }
 
+/**
+ * Close the application window.
+ */
 export async function closeApp(): Promise<void> {
   if (!isTauri) return;
+
   await getCurrentWindow().close();
 }
 
+/**
+ * Minimize the application window.
+ */
 export async function minimizeApp(): Promise<void> {
   if (!isTauri) return;
+
   await getCurrentWindow().minimize();
 }
 
-/** Read a JSON blob from `$APP_DATA/<fileName>` (config.json / tasks.json / theme.json). */
-export async function readJsonFile<T>(fileName: string): Promise<T | null> {
+/**
+ * Read a JSON blob from the application data directory.
+ *
+ * In a normal Tauri build, this is handled by the Rust storage
+ * command.
+ *
+ * During browser/Vite development, localStorage provides a
+ * lightweight fallback.
+ */
+export async function readJsonFile<T>(
+    fileName: string,
+): Promise<T | null> {
   if (!isTauri) {
-    const raw = window.localStorage.getItem(`dev:${fileName}`);
-    return raw ? (JSON.parse(raw) as T) : null;
+    const raw = window.localStorage.getItem(
+        `dev:${fileName}`,
+    );
+
+    return raw
+        ? (JSON.parse(raw) as T)
+        : null;
   }
-  const value = await invoke<T | null>("read_json_file", { fileName });
+
+  const value = await invoke<T | null>(
+      "read_json_file",
+      { fileName },
+  );
+
   return value ?? null;
 }
 
-/** Atomically persist a JSON blob to `$APP_DATA/<fileName>`. */
-export async function writeJsonFile<T>(fileName: string, contents: T): Promise<void> {
+/**
+ * Persist a JSON blob to the application data directory.
+ *
+ * During browser/Vite development, localStorage is used instead.
+ */
+export async function writeJsonFile<T>(
+    fileName: string,
+    contents: T,
+): Promise<void> {
   if (!isTauri) {
-    window.localStorage.setItem(`dev:${fileName}`, JSON.stringify(contents));
+    window.localStorage.setItem(
+        `dev:${fileName}`,
+        JSON.stringify(contents),
+    );
+
     return;
   }
-  await invoke("write_json_file", { fileName, contents });
+
+  await invoke("write_json_file", {
+    fileName,
+    contents,
+  });
 }
 
-/** Ask (once) for OS notification permission, then fire a native toast. */
-export async function notify(title: string, body: string): Promise<void> {
+/**
+ * Request OS notification permission when necessary and then
+ * send a native notification.
+ *
+ * Browser development falls back to the Web Notification API.
+ */
+export async function notify(
+    title: string,
+    body: string,
+): Promise<void> {
   if (!isTauri) {
-    if ("Notification" in window && Notification.permission === "granted") {
+    if (
+        "Notification" in window &&
+        Notification.permission === "granted"
+    ) {
       new Notification(title, { body });
     }
+
     return;
   }
+
   let granted = await isPermissionGranted();
+
   if (!granted) {
     const result = await requestPermission();
     granted = result === "granted";
   }
+
   if (granted) {
-    sendNotification({ title, body });
+    sendNotification({
+      title,
+      body,
+    });
   }
 }

@@ -13,9 +13,6 @@ pub enum SnapPosition {
 
 const EDGE_MARGIN: i32 = 48;
 
-// Must match .app-scale { transform: scale(0.7) } in index.css.
-const APP_SCALE: f64 = 0.7;
-
 fn active_monitor<R: Runtime>(
     window: &WebviewWindow<R>,
 ) -> Result<Monitor, String> {
@@ -58,29 +55,29 @@ pub fn snap_window<R: Runtime>(
     position: SnapPosition,
 ) -> Result<(), String> {
     let monitor = active_monitor(&window)?;
-
-    // Use the monitor's work area instead of the full monitor.
-    // This excludes the Windows taskbar and other reserved system areas.
     let work_area = monitor.work_area();
 
-    let window_size: PhysicalSize<u32> =
-        window.outer_size().map_err(|e| e.to_string())?;
+    /*
+     * The native window is now the same size as the visible application.
+     * There is no CSS transform to compensate for here.
+     */
+    let window_size = window
+        .outer_size()
+        .map_err(|e| e.to_string())?;
 
-    let margin = EDGE_MARGIN as f64;
+    let margin = EDGE_MARGIN;
 
-    // The native window remains at its original size,
-    // but the visible React content is scaled to 70%.
-    let visual_width = window_size.width as f64 * APP_SCALE;
-    let visual_height = window_size.height as f64 * APP_SCALE;
-
-    let work_left = work_area.position.x as f64;
-    let work_top = work_area.position.y as f64;
+    let work_left = work_area.position.x;
+    let work_top = work_area.position.y;
 
     let work_right =
-        work_left + work_area.size.width as f64;
+        work_left + work_area.size.width as i32;
 
     let work_bottom =
-        work_top + work_area.size.height as f64;
+        work_top + work_area.size.height as i32;
+
+    let window_width = window_size.width as i32;
+    let window_height = window_size.height as i32;
 
     let (x, y) = match position {
         SnapPosition::TopLeft => (
@@ -89,34 +86,31 @@ pub fn snap_window<R: Runtime>(
         ),
 
         SnapPosition::TopRight => (
-            work_right - margin - visual_width,
+            work_right - margin - window_width,
             work_top + margin,
         ),
 
         SnapPosition::BottomLeft => (
             work_left + margin,
-            work_bottom - margin - visual_height,
+            work_bottom - margin - window_height,
         ),
 
         SnapPosition::BottomRight => (
-            work_right - margin - visual_width,
-            work_bottom - margin - visual_height,
+            work_right - margin - window_width,
+            work_bottom - margin - window_height,
         ),
 
         SnapPosition::Center => (
             work_left
-                + (work_area.size.width as f64 - visual_width) / 2.0,
+                + (work_area.size.width as i32 - window_width) / 2,
 
             work_top
-                + (work_area.size.height as f64 - visual_height) / 2.0,
+                + (work_area.size.height as i32 - window_height) / 2,
         ),
     };
 
     window
-        .set_position(PhysicalPosition::new(
-            x.round() as i32,
-            y.round() as i32,
-        ))
+        .set_position(PhysicalPosition::new(x, y))
         .map_err(|e| e.to_string())
 }
 
