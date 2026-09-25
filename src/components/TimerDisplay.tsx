@@ -34,11 +34,11 @@ export function TimerDisplay() {
           className="flex w-full flex-col items-center gap-2"
           data-no-drag
       >
-        <div className="font-mono text-[44px] font-bold leading-none tracking-tight tabular-nums text-current">
+        <div className="font-mono text-[47px] font-bold leading-none tracking-tight tabular-nums text-current">
           {formatTime(secondsLeft)}
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-current/70">
+        <div className="flex items-center gap-2 font-mono text-[13px] uppercase tracking-[0.18em] text-current/70">
       <span>
         Cycle {cycle}/{cyclesTarget}
       </span>
@@ -62,7 +62,7 @@ export function TimerDisplay() {
           <button
               type="button"
               onClick={startPause}
-              className="flex h-14 w-44 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--accent)] font-mono text-base font-bold uppercase tracking-wide text-[var(--on-accent)] shadow-[0_6px_16px_rgba(51,59,77,0.28)] transition hover:brightness-110 active:scale-[0.98]"
+              className="flex h-[3.1rem] w-44 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--accent)] font-mono text-base font-bold uppercase tracking-wide text-[var(--on-accent)] shadow-[0_6px_16px_rgba(51,59,77,0.28)] transition hover:brightness-110 active:scale-[0.98]"
               aria-label={isRunning ? "Pause session" : "Start session"}
           >
             {isRunning ? (
