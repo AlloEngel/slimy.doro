@@ -75,7 +75,7 @@ export default function App() {
                 />
 
                 {!settingsOpen && (
-                    <div className="flex h-full w-full flex-col gap-2 px-4 pb-2 pt-8">
+                    <div className="flex h-full w-full flex-col gap-8 px-4 pb-2 pt-8">
                         <div
                             className={`flex min-h-0 flex-col items-center gap-1 ${
                                 !settings.showTodo
