@@ -139,6 +139,11 @@ export function SettingsPanel({
         (s) => s.toggleBlurBackground,
     );
 
+    // Toggles visibility of the slime sprite animation.
+    const toggleShowSlime = useAppStore(
+        (s) => s.toggleShowSlime,
+    );
+
     // Toggles visibility of the to-do list.
     const toggleShowTodo = useAppStore(
         (s) => s.toggleShowTodo,
@@ -180,7 +185,7 @@ export function SettingsPanel({
              */
             className="absolute inset-0 z-30 flex flex-col overflow-hidden rounded-cozy bg-[var(--surface)] text-[var(--text-deep)] shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
         >
-            {/* Sticky settings header */}
+            {/* Settings header remains visible while the content scrolls. */}
             <div className="z-10 flex shrink-0 items-center justify-between bg-[var(--surface)] px-5 py-3">
                 <h2 className="font-display text-lg font-bold text-[var(--text-deep)]">
                     Settings
@@ -197,7 +202,7 @@ export function SettingsPanel({
                 </button>
             </div>
 
-            {/* Scrollable settings content */}
+            {/* Scrollable settings content. */}
             <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-1">
                 <div className="flex flex-col gap-4">
 
@@ -283,6 +288,12 @@ export function SettingsPanel({
 
                     {/* General Toggles */}
                     <section className="divide-y divide-white/10 rounded-lg bg-white/[0.03] px-3 py-1">
+                        <Toggle
+                            checked={settings.showSlime}
+                            onChange={toggleShowSlime}
+                            label="Show slime animation"
+                        />
+
                         <Toggle
                             checked={settings.showTodo}
                             onChange={toggleShowTodo}

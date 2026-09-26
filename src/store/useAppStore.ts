@@ -64,6 +64,9 @@ interface AppState {
     // Enables or disables the native background blur effect.
     toggleBlurBackground: () => void;
 
+    // Shows or hides the slime sprite animation.
+    toggleShowSlime: () => void;
+
     // Shows or hides the Todo list.
     toggleShowTodo: () => void;
 
@@ -77,7 +80,9 @@ interface AppState {
     toggleAlwaysOnTop: () => void;
 
     // Updates one or more Pomodoro timer settings.
-    updateTimerSettings: (partial: Partial<AppSettings["timer"]>) => void;
+    updateTimerSettings: (
+        partial: Partial<AppSettings["timer"]>,
+    ) => void;
 
     // Creates a new task at the beginning of the task list.
     addTask: (title: string) => void;
@@ -185,6 +190,12 @@ export const useAppStore = create<AppState>((set) => ({
             readJsonFile<Task[]>("tasks.json"),
         ]);
 
+        /*
+         * Merge persisted settings over the defaults.
+         *
+         * This also provides the new showSlime property to existing
+         * configuration files that were created before this setting existed.
+         */
         const settings = {
             ...DEFAULT_SETTINGS,
             ...(storedSettings ?? {}),
@@ -224,6 +235,26 @@ export const useAppStore = create<AppState>((set) => ({
             const settings = {
                 ...state.settings,
                 blurBackground: !state.settings.blurBackground,
+            };
+
+            persistSettings(settings);
+
+            return { settings };
+        }),
+
+    /**
+     * Toggles visibility of the slime sprite animation and saves
+     * the preference.
+     *
+     * Disabling this setting only changes the UI rendering.
+     * The native window dimensions remain controlled by the Todo
+     * visibility setting.
+     */
+    toggleShowSlime: () =>
+        set((state) => {
+            const settings = {
+                ...state.settings,
+                showSlime: !state.settings.showSlime,
             };
 
             persistSettings(settings);

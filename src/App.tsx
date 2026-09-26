@@ -36,8 +36,9 @@ export default function App() {
     /*
      * Controls native click-through and Pin Mode behavior.
      *
-     * The persisted Always on Top preference is passed into the hook
-     * so native window state can remain synchronized with React state.
+     * The Always on Top setting is passed to the hook for API
+     * compatibility, but its native synchronization is handled
+     * separately below.
      */
     const { pinned, togglePin, setPin } = useClickThrough(
         settings.alwaysOnTop,
@@ -97,6 +98,10 @@ export default function App() {
      *
      * These dimensions are logical pixels, which keeps the application
      * consistent across monitors using different DPI scaling.
+     *
+     * The slime visibility setting intentionally does not affect
+     * the native window height. The available layout space is instead
+     * redistributed by the React flex layout below.
      */
     useEffect(() => {
         if (!hydrated) return;
@@ -190,13 +195,27 @@ export default function App() {
                 {!settingsOpen && (
                     <div className="flex h-full w-full flex-col gap-8 px-4 pb-2 pt-8">
                         <div
+                            /*
+                             * When the Todo list is hidden, the main timer
+                             * area already uses the available window height.
+                             *
+                             * The same flexible centering is also used when
+                             * the slime is hidden, allowing the TimerDisplay
+                             * to occupy the space left by the sprite instead
+                             * of leaving an empty gap.
+                             */
                             className={`flex min-h-0 flex-col items-center gap-1 ${
-                                !settings.showTodo
+                                !settings.showTodo ||
+                                !settings.showSlime
                                     ? "flex-1 justify-center"
                                     : ""
                             }`}
                         >
-                            <SlimeStage />
+
+                            {settings.showSlime && (
+                                <SlimeStage />
+                            )}
+
                             <TimerDisplay />
                         </div>
 

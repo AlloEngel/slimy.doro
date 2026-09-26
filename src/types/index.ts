@@ -34,11 +34,25 @@ export interface AppSettings {
   // Enables the native platform background blur/acrylic effect.
   blurBackground: boolean;
 
+  // Controls whether the slime sprite animation is visible.
+  showSlime: boolean;
+
+  // Controls whether the to-do list is visible.
   showTodo: boolean;
+
+  // Controls whether application sound effects are enabled.
   soundEnabled: boolean;
+
+  // Controls whether desktop notifications are enabled.
   notificationsEnabled: boolean;
+
+  // Controls the native Always on Top window state.
   alwaysOnTop: boolean;
+
+  // Stores all Pomodoro timer configuration values.
   timer: TimerSettings;
+
+  // Identifies the currently selected visual theme.
   themeId: string;
 }
 
@@ -66,6 +80,11 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
 export const DEFAULT_SETTINGS: AppSettings = {
   opacity: 100,
   blurBackground: false,
+
+  // The slime animation remains enabled by default to preserve
+  // the application's existing behavior for new and old users.
+  showSlime: true,
+
   showTodo: true,
   soundEnabled: true,
   notificationsEnabled: true,
