@@ -55,6 +55,9 @@ export function TodoList() {
     // Prevents adding more tasks after reaching the global limit.
     const atLimit = tasks.length >= MAX_TASKS;
 
+    // Maximum number of characters allowed in a task title.
+    const TASK_TITLE_MAX_LENGTH = 36;
+
     /**
      * Submits the new-task form.
      *
@@ -200,13 +203,18 @@ export function TodoList() {
                 <input
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
+                    maxLength={TASK_TITLE_MAX_LENGTH}
                     placeholder={
                         atLimit
                             ? "Task limit reached"
                             : "Add a task..."
                     }
                     disabled={atLimit}
-                    className="w-full min-w-0 rounded-md bg-black/5 px-2.5 py-1.5 text-[15px] text-current placeholder:text-current/40 focus:bg-black/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`w-full min-w-0 rounded-md bg-black/5 px-2.5 py-1.5 text-[15px] text-current placeholder:text-current/40 focus:bg-black/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                        draft.length === TASK_TITLE_MAX_LENGTH
+                            ? "ring-1 ring-[var(--accent)]"
+                            : ""
+                    }`}
                 />
 
                 <button
@@ -218,6 +226,13 @@ export function TodoList() {
                     <Plus size={13} strokeWidth={3} />
                 </button>
             </form>
+
+            {/* Explains why the task title cannot be made longer. */}
+            {draft.length === TASK_TITLE_MAX_LENGTH && (
+                <p className="-mt-1 text-xs text-[var(--accent)]/90">
+                    36-character limit reached.
+                </p>
+            )}
 
             {/* Explains why a new task cannot be added after reaching the limit. */}
             {atLimit && (
@@ -296,6 +311,7 @@ export function TodoList() {
                                             e.target.value,
                                         )
                                     }
+                                    maxLength={TASK_TITLE_MAX_LENGTH}
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
@@ -306,7 +322,12 @@ export function TodoList() {
                                             setEditingId(null);
                                         }
                                     }}
-                                    className="min-w-0 flex-1 rounded bg-black/5 px-1 text-[15px] text-current focus:outline-none"
+                                    className={`min-w-0 flex-1 rounded bg-black/5 px-1 text-[15px] text-current focus:outline-none ${
+                                        editValue.length ===
+                                        TASK_TITLE_MAX_LENGTH
+                                            ? "ring-1 ring-[var(--accent)]"
+                                            : ""
+                                    }`}
                                 />
                             ) : (
                                 <button
@@ -314,7 +335,7 @@ export function TodoList() {
                                     onDoubleClick={() =>
                                         beginEdit(task)
                                     }
-                                    className={`min-w-0 flex-1 text-left text-[15px] leading-[1.2] text-current/90 ${
+                                    className={`min-w-0 flex-1 break-all text-left text-[15px] leading-[1.2] text-current/90 ${
                                         task.done
                                             ? "line-through"
                                             : ""
