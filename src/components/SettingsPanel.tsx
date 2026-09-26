@@ -11,6 +11,12 @@ const SNAP_POSITIONS: { id: SnapPosition; label: string }[] = [
     { id: "bottom-right", label: "Bottom right" },
 ];
 
+/**
+ * Reusable toggle control used for boolean settings.
+ *
+ * Displays the current state and calls onChange when the user
+ * toggles the setting.
+ */
 function Toggle({
                     checked,
                     onChange,
@@ -45,6 +51,12 @@ function Toggle({
     );
 }
 
+/**
+ * Reusable numeric input used for timer settings.
+ *
+ * Clamps the entered value between the configured minimum
+ * and maximum before passing it to the parent component.
+ */
 function NumberField({
                          label,
                          value,
@@ -85,14 +97,37 @@ interface Props {
     onForceUnpin: () => void;
 }
 
+/**
+ * Settings panel for configuring the application's appearance,
+ * window behavior, general features, and Pomodoro timer.
+ */
 export function SettingsPanel({ onClose, onForceUnpin }: Props) {
+    // Reads the current application settings from the Zustand store.
     const settings = useAppStore((s) => s.settings);
+
+    // Updates the window transparency percentage.
     const setOpacity = useAppStore((s) => s.setOpacity);
+
+    // Toggles visibility of the to-do list.
     const toggleShowTodo = useAppStore((s) => s.toggleShowTodo);
+
+    // Toggles chiptune sound effects.
     const toggleSound = useAppStore((s) => s.toggleSound);
-    const toggleNotifications = useAppStore((s) => s.toggleNotifications);
-    const toggleAlwaysOnTop = useAppStore((s) => s.toggleAlwaysOnTop);
-    const updateTimerSettings = useAppStore((s) => s.updateTimerSettings);
+
+    // Toggles desktop notifications.
+    const toggleNotifications = useAppStore(
+        (s) => s.toggleNotifications,
+    );
+
+    // Toggles the native Always on Top window state.
+    const toggleAlwaysOnTop = useAppStore(
+        (s) => s.toggleAlwaysOnTop,
+    );
+
+    // Updates one or more Pomodoro timer settings.
+    const updateTimerSettings = useAppStore(
+        (s) => s.updateTimerSettings,
+    );
 
     return (
         <div
@@ -141,7 +176,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
 
                 <input
                     type="range"
-                    min={20}
+                    min={0}
                     max={100}
                     step={5}
                     value={settings.opacity}
@@ -149,6 +184,13 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                     className="w-full accent-[var(--accent)]"
                     aria-label="Window opacity"
                 />
+
+                {/* Warns the user that lower transparency values can reduce readability. */}
+                {settings.opacity <= 50 && (
+                    <p className="mt-1.5 text-xs leading-relaxed text-[var(--text)]/60">
+                        Lower transparency may make the interface harder to read.
+                    </p>
+                )}
             </section>
 
             {/* Window Position */}
@@ -210,7 +252,9 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                     label="Short break"
                     value={settings.timer.shortBreakMinutes}
                     onChange={(n) =>
-                        updateTimerSettings({ shortBreakMinutes: n })
+                        updateTimerSettings({
+                            shortBreakMinutes: n,
+                        })
                     }
                 />
 
@@ -218,7 +262,9 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                     label="Long break"
                     value={settings.timer.longBreakMinutes}
                     onChange={(n) =>
-                        updateTimerSettings({ longBreakMinutes: n })
+                        updateTimerSettings({
+                            longBreakMinutes: n,
+                        })
                     }
                 />
 
@@ -238,7 +284,8 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                     checked={settings.timer.autoStartNext}
                     onChange={() =>
                         updateTimerSettings({
-                            autoStartNext: !settings.timer.autoStartNext,
+                            autoStartNext:
+                                !settings.timer.autoStartNext,
                         })
                     }
                     label="Auto-start next session"
