@@ -93,8 +93,23 @@ export default function App() {
     ]);
 
     /*
-     * Resizes the native window according to whether the to-do list
-     * is currently visible.
+     * Determines whether the application should currently use
+     * the full-height layout.
+     *
+     * Settings always uses the full-height layout so changing
+     * Show to-do list while the Settings panel is open does not
+     * resize the visible application.
+     */
+    const useFullHeightLayout =
+        settingsOpen || settings.showTodo;
+
+    /*
+     * Resizes the native window according to the currently visible
+     * application state.
+     *
+     * While the Settings panel is open, the window intentionally
+     * keeps the full to-do-list height. Once Settings is closed,
+     * the height follows the Show to-do list setting again.
      *
      * These dimensions are logical pixels, which keeps the application
      * consistent across monitors using different DPI scaling.
@@ -106,13 +121,16 @@ export default function App() {
     useEffect(() => {
         if (!hydrated) return;
 
-        const height = settings.showTodo
+        const height = useFullHeightLayout
             ? NATIVE_HEIGHT_WITH_TODO
             : NATIVE_HEIGHT_WITHOUT_TODO;
 
         void setWindowWidth(NATIVE_WIDTH);
         void setWindowHeight(height);
-    }, [hydrated, settings.showTodo]);
+    }, [
+        hydrated,
+        useFullHeightLayout,
+    ]);
 
     /*
      * The application starts with a transparent WebView while persisted
@@ -133,10 +151,12 @@ export default function App() {
     const alpha = opacityToAlpha(settings.opacity);
 
     /*
-     * Selects the correct scaled layout depending on whether the
-     * to-do list is enabled.
+     * Selects the correct scaled layout.
+     *
+     * Settings uses the full-height layout even when the to-do list
+     * has been disabled, preventing the Settings panel from shrinking.
      */
-    const appScaleClass = settings.showTodo
+    const appScaleClass = useFullHeightLayout
         ? "app-scale"
         : "app-scale-no-todo";
 
@@ -211,7 +231,6 @@ export default function App() {
                                     : ""
                             }`}
                         >
-
                             {settings.showSlime && (
                                 <SlimeStage />
                             )}
