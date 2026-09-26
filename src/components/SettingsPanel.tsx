@@ -134,7 +134,6 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
             // Fixed, fully opaque surface — independent of the user's
             // transparency slider, so Settings can never bleed content through.
             className="absolute inset-0 z-30 flex flex-col gap-3 overflow-y-auto rounded-cozy bg-[var(--surface)] p-4 text-[var(--text-deep)] shadow-[0_12px_30px_rgba(0,0,0,0.55)]"
-            data-no-drag
         >
             {/* Header */}
             <div className="flex items-center justify-between">

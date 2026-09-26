@@ -2,17 +2,30 @@ import { useCallback, type MouseEvent } from "react";
 import { startWindowDrag } from "@/lib/tauri";
 
 /**
- * There is no native titlebar, so any "chrome" surface (the top strip,
- * the empty space around the timer) doubles as a drag handle. Attach
- * the returned handler to `onMouseDown` on that surface only — never on
- * interactive controls like buttons or inputs.
+ * There is no native titlebar, so any non-interactive surface can
+ * also act as a drag handle for the native window.
+ *
+ * Interactive controls are excluded so clicking buttons, inputs,
+ * labels, links, or explicitly protected areas does not start
+ * a window drag.
  */
 export function useWindowDrag() {
   return useCallback((event: MouseEvent) => {
-    // Only primary button, and don't hijack clicks on real controls.
+    // Only primary mouse button can start a window drag.
     if (event.button !== 0) return;
+
     const target = event.target as HTMLElement;
-    if (target.closest("button, input, textarea, a, [data-no-drag]")) return;
+
+    // Do not hijack interaction with real controls or protected areas.
+    if (
+        target.closest(
+            "button, input, textarea, a, label, [data-no-drag]",
+        )
+    ) {
+      return;
+    }
+
+    // Start dragging the native Tauri window.
     void startWindowDrag();
   }, []);
 }
