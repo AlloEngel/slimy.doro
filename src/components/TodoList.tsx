@@ -381,13 +381,22 @@ export function TodoList() {
                                 />
                             </button>
 
-                            {/* Task deletion button. */}
+                            {/*
+                             * Completed tasks always keep the delete action visible.
+                             *
+                             * Active tasks only reveal the delete button when
+                             * the row is hovered or the button receives focus.
+                             */}
                             <button
                                 type="button"
                                 onClick={() => deleteTask(task.id)}
                                 aria-label="Delete task"
                                 title="Delete task"
-                                className="flex h-5 w-5 shrink-0 items-center justify-center text-current/50 opacity-0 transition hover:text-[var(--accent)] group-hover:opacity-100 focus:opacity-100"
+                                className={`flex h-5 w-5 shrink-0 items-center justify-center text-current/50 transition hover:text-[var(--accent)] ${
+                                    task.done
+                                        ? "opacity-100"
+                                        : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                }`}
                             >
                                 <Trash2 size={16} />
                             </button>
