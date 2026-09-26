@@ -172,7 +172,7 @@ export function TodoList() {
 
     return (
         <div
-            className="flex min-h-0 flex-1 flex-col gap-2"
+            className="flex min-h-0 flex-1 flex-col gap-1.5"
             data-no-drag
         >
             {/* Todo header and current task count. */}
@@ -231,7 +231,7 @@ export function TodoList() {
                 The order here is exactly the order stored in the Zustand store.
                 Tasks can be reordered using either the chevrons or drag and drop.
             */}
-            <ul className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
+            <ul className="flex min-h-0 flex-1 flex-col gap-0.3 overflow-y-auto pr-1">
                 {/* Empty-state message shown when there are no tasks. */}
                 {tasks.length === 0 && (
                     <li className="pt-1 text-sm italic leading-snug text-current/50">
@@ -262,7 +262,7 @@ export function TodoList() {
                                 handleDrop(e, index)
                             }
                             onDragEnd={handleDragEnd}
-                            className={`group flex cursor-grab items-center gap-1.5 rounded-lg px-1 py-1.5 transition hover:bg-black/5 active:cursor-grabbing ${
+                            className={`group flex cursor-grab items-start gap-1.5 rounded-lg px-1 py-1.5 transition hover:bg-black/5 active:cursor-grabbing ${
                                 task.done ? "opacity-50" : ""
                             } ${
                                 isDragging
@@ -314,7 +314,7 @@ export function TodoList() {
                                     onDoubleClick={() =>
                                         beginEdit(task)
                                     }
-                                    className={`min-w-0 flex-1 text-left text-[15px] leading-snug text-current/90 ${
+                                    className={`min-w-0 flex-1 text-left text-[15px] leading-[1.2] text-current/90 ${
                                         task.done
                                             ? "line-through"
                                             : ""
