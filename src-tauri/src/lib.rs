@@ -112,18 +112,12 @@ pub fn run() {
                                     .set_ignore_cursor_events(false);
 
                                 /*
-                                 * Temporarily disable Always on Top.
-                                 *
-                                 * React restores the user's persisted
-                                 * Always on Top preference after receiving
-                                 * the shortcut event.
-                                 */
-                                let _ =
-                                    window.set_always_on_top(false);
-
-                                /*
                                  * Notify the React application that the
                                  * emergency unpin was triggered.
+                                 *
+                                 * Always on Top is intentionally left
+                                 * unchanged because it is an independent
+                                 * user preference.
                                  */
                                 let _ = window.emit(
                                     "shortcut://force-unpin",

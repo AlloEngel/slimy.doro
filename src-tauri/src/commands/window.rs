@@ -35,8 +35,8 @@ fn active_monitor<R: Runtime>(
 
 /// Enables or disables Pin Mode.
 ///
-/// When Pin Mode is enabled, the window stays on top and ignores
-/// cursor events so the user can interact with the content below it.
+/// Pin Mode controls click-through behavior independently from
+/// the user's Always on Top preference.
 #[tauri::command]
 pub fn set_pin_mode<R: Runtime>(
     window: WebviewWindow<R>,
@@ -44,19 +44,13 @@ pub fn set_pin_mode<R: Runtime>(
 ) -> Result<(), String> {
     window
         .set_ignore_cursor_events(pinned)
-        .map_err(|e| e.to_string())?;
-
-    window
-        .set_always_on_top(pinned)
-        .map_err(|e| e.to_string())?;
-
-    Ok(())
+        .map_err(|e| e.to_string())
 }
 
 /// Controls the native Always on Top state.
 ///
-/// This is kept separate from Pin Mode because Always on Top can be
-/// enabled without making the window click-through.
+/// Always on Top is independent from Pin Mode, so enabling or
+/// disabling Pin Mode does not change this preference.
 #[tauri::command]
 pub fn set_always_on_top<R: Runtime>(
     window: WebviewWindow<R>,
@@ -70,7 +64,7 @@ pub fn set_always_on_top<R: Runtime>(
 /// Enables or disables the native background window effect.
 ///
 /// Windows:
-/// - Uses Acrylic on Windows 10 and Windows 11.
+/// - Uses the native Blur effect on Windows 10 and Windows 11.
 /// - The effect is rendered by the native window system, allowing
 ///   content outside the WebView to be blurred.
 ///
@@ -78,8 +72,8 @@ pub fn set_always_on_top<R: Runtime>(
 /// - Uses a native vibrancy material.
 ///
 /// Linux:
-/// - Native Tauri window effects are unsupported.
-/// - The command safely does nothing.
+/// - Tauri does not currently support native window effects.
+/// - The window remains transparent without applying a native effect.
 ///
 /// The window must be configured as transparent for native effects
 /// to work correctly.
@@ -93,11 +87,11 @@ pub fn set_background_effect<R: Runtime>(
         use tauri::window::{Effect, EffectsBuilder};
 
         /*
-         * Windows uses the native Acrylic material.
+         * Windows uses the native Blur effect.
          *
-         * Unlike CSS backdrop-filter, Acrylic is applied by the
-         * native window system and can blur content outside the
-         * WebView itself.
+         * Unlike CSS backdrop-filter, this effect operates on the
+         * native window and can therefore blur desktop content
+         * behind the application.
          */
         if enabled {
             let effects = EffectsBuilder::new()
@@ -109,8 +103,8 @@ pub fn set_background_effect<R: Runtime>(
                 .map_err(|e| e.to_string())?;
         } else {
             /*
-             * Passing None removes the native effect and restores
-             * the normal transparent window behavior.
+             * Removing the effect restores the normal transparent
+             * window behavior.
              */
             window
                 .set_effects(None)
@@ -128,13 +122,14 @@ pub fn set_background_effect<R: Runtime>(
             EffectsBuilder,
         };
 
-        /*
-         * macOS uses a native vibrancy material instead of Acrylic.
-         *
-         * Popover provides a translucent system material suitable
-         * for a compact floating desktop application.
-         */
         if enabled {
+            /*
+             * macOS uses native vibrancy materials instead of
+             * the Windows Blur system.
+             *
+             * Popover provides a translucent system material
+             * suitable for a compact floating application.
+             */
             let effects = EffectsBuilder::new()
                 .effect(Effect::Popover)
                 .state(EffectState::Active)
@@ -145,7 +140,8 @@ pub fn set_background_effect<R: Runtime>(
                 .map_err(|e| e.to_string())?;
         } else {
             /*
-             * Remove the native vibrancy effect when disabled.
+             * Remove any active native effect when Background
+             * blur is disabled.
              */
             window
                 .set_effects(None)
@@ -159,7 +155,11 @@ pub fn set_background_effect<R: Runtime>(
     {
         /*
          * Native Tauri window effects are currently unsupported
-         * on Linux, so the setting behaves as a safe no-op.
+         * on Linux.
+         *
+         * The application intentionally keeps running with its
+         * normal transparent window behavior instead of failing
+         * when the user enables Background blur.
          */
         let _ = window;
         let _ = enabled;

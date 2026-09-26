@@ -1,44 +1,68 @@
-// Added a second listener for the global-shortcut event. Unlike the
-// tray toggle (which flips state), this one always forces `pinned`
-// to false — it's the "get me unstuck" button, not a toggle.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { setPinMode, setAlwaysOnTop, isTauri } from "@/lib/tauri";
+import { setPinMode, isTauri } from "@/lib/tauri";
 
+/**
+ * Controls Pin Mode independently from the Always on Top preference.
+ *
+ * Pin Mode only controls whether the window ignores mouse events.
+ * Always on Top is managed by App.tsx and the application settings store.
+ */
+export function useClickThrough(_alwaysOnTop: boolean) {
+  const [pinned, setPinned] = useState(false);
 
-export function useClickThrough(alwaysOnTop: boolean) {
-  {
-    const [pinned, setPinned] = useState(false);
-    const pinnedRef = useRef(pinned);
-    pinnedRef.current = pinned;
+  // Keeps the latest Pin Mode value available to callbacks.
+  const pinnedRef = useRef(pinned);
+  pinnedRef.current = pinned;
 
-    const setPin = useCallback(async (next: boolean) => {
-      setPinned(next);
-      await setPinMode(next);
-    }, []);
+  /*
+   * Changes Pin Mode without modifying Always on Top.
+   */
+  const setPin = useCallback(async (next: boolean) => {
+    setPinned(next);
+    await setPinMode(next);
+  }, []);
 
-    const togglePin = useCallback(() => {
-      void setPin(!pinnedRef.current);
-    }, [setPin, alwaysOnTop]);
+  /*
+   * Toggles Pin Mode based on the current pinned state.
+   */
+  const togglePin = useCallback(() => {
+    void setPin(!pinnedRef.current);
+  }, [setPin]);
 
-    useEffect(() => {
-      if (!isTauri) return;
-      const unlisteners: Array<() => void> = [];
+  /*
+   * Listens for the native emergency-unpin shortcut.
+   *
+   * The Rust handler already restores mouse interaction.
+   * React only needs to synchronize its local Pin state.
+   *
+   * Always on Top is intentionally not touched here.
+   */
+  useEffect(() => {
+    if (!isTauri) return;
 
-      getCurrentWindow()
-          .listen("shortcut://force-unpin", async () => {
-            // The Rust shortcut handler already disables click-through
-            // and temporarily disables Always on Top to recover the window.
-            setPinned(false);
+    let unlisten: (() => void) | undefined;
 
-            // Restore the user's persisted Always on Top preference.
-            await setAlwaysOnTop(alwaysOnTop);
-          })
-          .then((fn) => unlisteners.push(fn));
+    void getCurrentWindow()
+        .listen("shortcut://force-unpin", () => {
+          /*
+           * The native shortcut has already disabled
+           * click-through at the window level.
+           */
+          setPinned(false);
+        })
+        .then((fn) => {
+          unlisten = fn;
+        });
 
-      return () => unlisteners.forEach((fn) => fn());
-    }, [setPin, alwaysOnTop]);
+    return () => {
+      unlisten?.();
+    };
+  }, []);
 
-    return {pinned, togglePin, setPin};
-  }
+  return {
+    pinned,
+    togglePin,
+    setPin,
+  };
 }

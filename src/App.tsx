@@ -57,31 +57,39 @@ export default function App() {
     }, [hydrate]);
 
     /*
-     * Restores the persisted Always on Top state after hydration.
+     * Synchronizes native window effects after application settings
+     * have been hydrated.
      *
-     * React state and native window state are separate, so the native
-     * window must be synchronized explicitly.
+     * The background effect is applied first and Always on Top is
+     * applied afterwards so the final native window state explicitly
+     * matches the user's persisted preference.
      */
     useEffect(() => {
         if (!hydrated) return;
 
-        void setAlwaysOnTop(settings.alwaysOnTop);
-    }, [hydrated, settings.alwaysOnTop]);
+        const synchronizeWindowState = async () => {
+            /*
+             * Apply the native background effect first.
+             */
+            await setBackgroundEffect(
+                settings.blurBackground,
+            );
 
-    /*
-     * Applies the native background effect after hydration and whenever
-     * the Background blur setting changes.
-     *
-     * The actual blur is handled by the operating system rather than
-     * CSS backdrop-filter.
-     */
-    useEffect(() => {
-        if (!hydrated) return;
+            /*
+             * Apply Always on Top last so it remains the final
+             * native z-order state of the window.
+             */
+            await setAlwaysOnTop(
+                settings.alwaysOnTop,
+            );
+        };
 
-        void setBackgroundEffect(
-            settings.blurBackground,
-        );
-    }, [hydrated, settings.blurBackground]);
+        void synchronizeWindowState();
+    }, [
+        hydrated,
+        settings.blurBackground,
+        settings.alwaysOnTop,
+    ]);
 
     /*
      * Resizes the native window according to whether the to-do list
