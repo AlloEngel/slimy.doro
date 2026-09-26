@@ -61,6 +61,9 @@ interface AppState {
     // Updates the application's opacity setting.
     setOpacity: (opacity: OpacityPreset) => void;
 
+    // Enables or disables the native background blur effect.
+    toggleBlurBackground: () => void;
+
     // Shows or hides the Todo list.
     toggleShowTodo: () => void;
 
@@ -196,13 +199,31 @@ export const useAppStore = create<AppState>((set) => ({
     },
 
     /**
-     * Changes the application's transparency preset and saves it.
+     * Changes the application's transparency percentage and saves it.
      */
     setOpacity: (opacity) =>
         set((state) => {
             const settings = {
                 ...state.settings,
                 opacity,
+            };
+
+            persistSettings(settings);
+
+            return { settings };
+        }),
+
+    /**
+     * Toggles the native background blur effect and saves the preference.
+     *
+     * The actual platform-specific window effect is applied by the
+     * application layer after the setting changes.
+     */
+    toggleBlurBackground: () =>
+        set((state) => {
+            const settings = {
+                ...state.settings,
+                blurBackground: !state.settings.blurBackground,
             };
 
             persistSettings(settings);
@@ -601,6 +622,9 @@ export const useAppStore = create<AppState>((set) => ({
             return { tasks };
         }),
 
+    /**
+     * Starts or pauses the current Pomodoro session.
+     */
     startPause: () =>
         set((state) => {
             const isRunning = !state.isRunning;
@@ -748,7 +772,7 @@ function computeAdvance(
             settings,
         ),
         isRunning:
-            settings.timer.autoStartNext,
+        settings.timer.autoStartNext,
         lastEvent: completed
             ? {
                 kind: "jump",

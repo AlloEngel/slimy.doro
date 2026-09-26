@@ -58,6 +58,24 @@ export async function setAlwaysOnTop(
 }
 
 /**
+ * Enable or disable the native platform background effect.
+ *
+ * The Rust implementation is responsible for selecting the
+ * appropriate native effect for the current operating system.
+ *
+ * On Windows this can use Acrylic, while macOS can use a native
+ * vibrancy material. Unsupported platforms can safely fall back
+ * to the normal transparent window.
+ */
+export async function setBackgroundEffect(
+    enabled: boolean,
+): Promise<void> {
+  if (!isTauri) return;
+
+  await invoke("set_background_effect", { enabled });
+}
+
+/**
  * Snap the native window to one of the supported positions.
  *
  * The Rust implementation now works directly with the native

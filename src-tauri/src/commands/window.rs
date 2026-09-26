@@ -19,6 +19,10 @@ pub enum SnapPosition {
 
 const EDGE_MARGIN: i32 = 48;
 
+/// Returns the monitor currently associated with the window.
+///
+/// If the current monitor cannot be determined, the primary monitor
+/// is used as a fallback.
 fn active_monitor<R: Runtime>(
     window: &WebviewWindow<R>,
 ) -> Result<Monitor, String> {
@@ -29,6 +33,10 @@ fn active_monitor<R: Runtime>(
         .ok_or_else(|| "no monitor available for this window".to_string())
 }
 
+/// Enables or disables Pin Mode.
+///
+/// When Pin Mode is enabled, the window stays on top and ignores
+/// cursor events so the user can interact with the content below it.
 #[tauri::command]
 pub fn set_pin_mode<R: Runtime>(
     window: WebviewWindow<R>,
@@ -45,6 +53,10 @@ pub fn set_pin_mode<R: Runtime>(
     Ok(())
 }
 
+/// Controls the native Always on Top state.
+///
+/// This is kept separate from Pin Mode because Always on Top can be
+/// enabled without making the window click-through.
 #[tauri::command]
 pub fn set_always_on_top<R: Runtime>(
     window: WebviewWindow<R>,
@@ -55,6 +67,116 @@ pub fn set_always_on_top<R: Runtime>(
         .map_err(|e| e.to_string())
 }
 
+/// Enables or disables the native background window effect.
+///
+/// Windows:
+/// - Uses Acrylic on Windows 10 and Windows 11.
+/// - The effect is rendered by the native window system, allowing
+///   content outside the WebView to be blurred.
+///
+/// macOS:
+/// - Uses a native vibrancy material.
+///
+/// Linux:
+/// - Native Tauri window effects are unsupported.
+/// - The command safely does nothing.
+///
+/// The window must be configured as transparent for native effects
+/// to work correctly.
+#[tauri::command]
+pub fn set_background_effect<R: Runtime>(
+    window: WebviewWindow<R>,
+    enabled: bool,
+) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use tauri::window::{Effect, EffectsBuilder};
+
+        /*
+         * Windows uses the native Acrylic material.
+         *
+         * Unlike CSS backdrop-filter, Acrylic is applied by the
+         * native window system and can blur content outside the
+         * WebView itself.
+         */
+        if enabled {
+            let effects = EffectsBuilder::new()
+                .effect(Effect::Blur)
+                .build();
+
+            window
+                .set_effects(effects)
+                .map_err(|e| e.to_string())?;
+        } else {
+            /*
+             * Passing None removes the native effect and restores
+             * the normal transparent window behavior.
+             */
+            window
+                .set_effects(None)
+                .map_err(|e| e.to_string())?;
+        }
+
+        return Ok(());
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::window::{
+            Effect,
+            EffectState,
+            EffectsBuilder,
+        };
+
+        /*
+         * macOS uses a native vibrancy material instead of Acrylic.
+         *
+         * Popover provides a translucent system material suitable
+         * for a compact floating desktop application.
+         */
+        if enabled {
+            let effects = EffectsBuilder::new()
+                .effect(Effect::Popover)
+                .state(EffectState::Active)
+                .build();
+
+            window
+                .set_effects(effects)
+                .map_err(|e| e.to_string())?;
+        } else {
+            /*
+             * Remove the native vibrancy effect when disabled.
+             */
+            window
+                .set_effects(None)
+                .map_err(|e| e.to_string())?;
+        }
+
+        return Ok(());
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        /*
+         * Native Tauri window effects are currently unsupported
+         * on Linux, so the setting behaves as a safe no-op.
+         */
+        let _ = window;
+        let _ = enabled;
+
+        return Ok(());
+    }
+
+    #[allow(unreachable_code)]
+    Ok(())
+}
+
+/// Moves the window to one of the supported snap positions.
+///
+/// Window dimensions are read in physical pixels because the monitor
+/// work area and native window position use physical coordinates.
+///
+/// Window resizing itself is still performed using logical dimensions.
 #[tauri::command]
 pub fn snap_window<R: Runtime>(
     window: WebviewWindow<R>,
@@ -64,12 +186,8 @@ pub fn snap_window<R: Runtime>(
     let work_area = monitor.work_area();
 
     /*
-     * The native window is sized using logical dimensions, but its
-     * physical size depends on the monitor's DPI scale.
-     *
-     * For positioning, however, the monitor work area and native
-     * window position are expressed in physical pixels, so the
-     * existing physical positioning logic remains appropriate.
+     * The native window size depends on the current monitor DPI.
+     * Position calculations, however, use physical coordinates.
      */
     let window_size = window
         .outer_size()
@@ -124,11 +242,10 @@ pub fn snap_window<R: Runtime>(
         .map_err(|e| e.to_string())
 }
 
-// Kept for compatibility with the existing frontend/command registration.
-//
-// The width is now interpreted as a logical/CSS pixel value instead
-// of a physical pixel value. This prevents Windows DPI scaling from
-// shrinking the WebView viewport on monitors using 125%, 150%, etc.
+/// Sets the native window width using logical pixels.
+///
+/// Logical sizing is required to keep the CSS/WebView viewport
+/// consistent across monitors with different DPI scaling.
 #[tauri::command]
 pub fn set_window_width<R: Runtime>(
     window: WebviewWindow<R>,
@@ -142,18 +259,21 @@ pub fn set_window_width<R: Runtime>(
         .outer_size()
         .map_err(|e| e.to_string())?;
 
-    let logical_size = physical_size.to_logical::<f64>(scale_factor);
+    let logical_size =
+        physical_size.to_logical::<f64>(scale_factor);
 
     window
-        .set_size(LogicalSize::new(width, logical_size.height))
+        .set_size(LogicalSize::new(
+            width,
+            logical_size.height,
+        ))
         .map_err(|e| e.to_string())
 }
 
-// Kept for compatibility with the existing frontend/command registration.
-//
-// The height is now interpreted as a logical/CSS pixel value instead
-// of a physical pixel value. This keeps the application's CSS layout
-// consistent across monitors with different DPI scaling.
+/// Sets the native window height using logical pixels.
+///
+/// This prevents Windows DPI scaling from shrinking the native window
+/// relative to the dimensions expected by the CSS layout.
 #[tauri::command]
 pub fn set_window_height<R: Runtime>(
     window: WebviewWindow<R>,
@@ -167,14 +287,21 @@ pub fn set_window_height<R: Runtime>(
         .outer_size()
         .map_err(|e| e.to_string())?;
 
-    let logical_size = physical_size.to_logical::<f64>(scale_factor);
+    let logical_size =
+        physical_size.to_logical::<f64>(scale_factor);
 
     window
-        .set_size(LogicalSize::new(logical_size.width, height))
+        .set_size(LogicalSize::new(
+            logical_size.width,
+            height,
+        ))
         .map_err(|e| e.to_string())
 }
 
-// Kept for compatibility with the existing frontend/command registration.
+/// Starts the native window drag operation.
+///
+/// The application does not use a native titlebar, so non-interactive
+/// parts of the UI can call this command to move the window.
 #[tauri::command]
 pub fn start_drag<R: Runtime>(
     window: WebviewWindow<R>,
@@ -184,7 +311,9 @@ pub fn start_drag<R: Runtime>(
         .map_err(|e| e.to_string())
 }
 
-// Kept for compatibility with the existing frontend/command registration.
+/// Moves the window by the requested physical pixel offset.
+///
+/// This command is used for incremental native window movement.
 #[tauri::command]
 pub fn move_window_by<R: Runtime>(
     window: WebviewWindow<R>,

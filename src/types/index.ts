@@ -9,11 +9,16 @@ export interface Task {
   createdAt: number;
 }
 
-// Now a free-form percentage (20-100), not a fixed preset — driven by
-// the Settings slider. Clamping happens in the store's setOpacity.
+// Free-form opacity percentage controlled by the Settings slider.
+// Clamping is handled by the store's setOpacity action.
 export type OpacityPreset = number;
 
-export type SnapPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
+export type SnapPosition =
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right"
+    | "center";
 
 export interface TimerSettings {
   focusMinutes: number;
@@ -25,6 +30,10 @@ export interface TimerSettings {
 
 export interface AppSettings {
   opacity: OpacityPreset;
+
+  // Enables the native platform background blur/acrylic effect.
+  blurBackground: boolean;
+
   showTodo: boolean;
   soundEnabled: boolean;
   notificationsEnabled: boolean;
@@ -55,7 +64,8 @@ export const DEFAULT_TIMER_SETTINGS: TimerSettings = {
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  opacity: 100, // solid by default — no more translucent-on-first-launch
+  opacity: 100,
+  blurBackground: false,
   showTodo: true,
   soundEnabled: true,
   notificationsEnabled: true,

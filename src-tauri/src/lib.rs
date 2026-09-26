@@ -303,6 +303,7 @@ pub fn run() {
                 commands::window::move_window_by,
                 commands::storage::read_json_file,
                 commands::storage::write_json_file,
+                commands::window::set_background_effect,
             ],
         )
 

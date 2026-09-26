@@ -6,6 +6,7 @@ import { useWindowDrag } from "@/hooks/useWindowDrag";
 import { resolveContrastMode, opacityToAlpha } from "@/lib/theme";
 import {
     setAlwaysOnTop,
+    setBackgroundEffect,
     setWindowHeight,
     setWindowWidth,
 } from "@/lib/tauri";
@@ -15,72 +16,51 @@ import { TitleBarControls } from "@/components/TitleBarControls";
 import { TodoList } from "@/components/TodoList";
 import { SettingsPanel } from "@/components/SettingsPanel";
 
-/*
- * Native window dimensions.
- *
- * The native Tauri window is intentionally kept larger than the
- * CSS-scaled visual interface. The .app-scale classes handle the
- * visual scaling inside this native area.
- *
- * App.tsx is the source of truth for the runtime window size.
- * The window-state plugin only restores the position.
- */
 const NATIVE_WIDTH = 231;
 const NATIVE_HEIGHT_WITH_TODO = 382;
 const NATIVE_HEIGHT_WITHOUT_TODO = 230;
 
-/**
- * Main application component.
- *
- * Responsible for:
- * - Hydrating persisted application state.
- * - Synchronizing the native window size with the current layout.
- * - Restoring the persisted Always on Top preference.
- * - Handling window dragging.
- * - Rendering the main Pomodoro interface and Settings panel.
- */
 export default function App() {
     // Indicates whether persisted application data has finished loading.
     const hydrated = useAppStore((s) => s.hydrated);
 
-    // Loads persisted application state from storage.
+    // Loads persisted settings and application data.
     const hydrate = useAppStore((s) => s.hydrate);
 
-    // Reads the persisted application settings.
+    // Reads the current application settings from the global store.
     const settings = useAppStore((s) => s.settings);
 
-    // Controls whether the Settings panel is currently visible.
+    // Controls whether the settings panel is currently visible.
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     /*
-     * Click-through state.
+     * Controls native click-through and Pin Mode behavior.
      *
-     * Always on Top is passed to the hook because the emergency
-     * unpin shortcut temporarily disables native Always on Top.
-     * The hook restores the user's persisted preference afterward.
+     * The persisted Always on Top preference is passed into the hook
+     * so native window state can remain synchronized with React state.
      */
     const { pinned, togglePin, setPin } = useClickThrough(
         settings.alwaysOnTop,
     );
 
-    // Provides native window dragging from non-interactive surfaces.
+    // Provides native window dragging for non-interactive areas.
     const handleDragStart = useWindowDrag();
 
-    // Runs the Pomodoro timer ticker.
+    // Keeps the Pomodoro timer synchronized with elapsed real time.
     usePomodoroTicker();
 
-    /**
-     * Hydrates persisted application data once when the app starts.
+    /*
+     * Loads persisted application state when the application starts.
      */
     useEffect(() => {
         void hydrate();
     }, [hydrate]);
 
-    /**
-     * Applies the persisted Always on Top preference to the native window.
+    /*
+     * Restores the persisted Always on Top state after hydration.
      *
-     * This runs after hydration so the native window reflects the saved
-     * setting instead of relying only on the value from tauri.conf.json.
+     * React state and native window state are separate, so the native
+     * window must be synchronized explicitly.
      */
     useEffect(() => {
         if (!hydrated) return;
@@ -88,14 +68,27 @@ export default function App() {
         void setAlwaysOnTop(settings.alwaysOnTop);
     }, [hydrated, settings.alwaysOnTop]);
 
-    /**
-     * Synchronizes the native window size with the current layout.
+    /*
+     * Applies the native background effect after hydration and whenever
+     * the Background blur setting changes.
      *
-     * The to-do list requires the taller window. When it is hidden,
-     * the window shrinks back to the compact Pomodoro size.
+     * The actual blur is handled by the operating system rather than
+     * CSS backdrop-filter.
+     */
+    useEffect(() => {
+        if (!hydrated) return;
+
+        void setBackgroundEffect(
+            settings.blurBackground,
+        );
+    }, [hydrated, settings.blurBackground]);
+
+    /*
+     * Resizes the native window according to whether the to-do list
+     * is currently visible.
      *
-     * The explicit dimensions here prevent an old window-state size
-     * from determining the actual application layout.
+     * These dimensions are logical pixels, which keeps the application
+     * consistent across monitors using different DPI scaling.
      */
     useEffect(() => {
         if (!hydrated) return;
@@ -104,38 +97,54 @@ export default function App() {
             ? NATIVE_HEIGHT_WITH_TODO
             : NATIVE_HEIGHT_WITHOUT_TODO;
 
-        // Keep the native width fixed for both layouts.
         void setWindowWidth(NATIVE_WIDTH);
-
-        // Adjust only the height that changes with the to-do list.
         void setWindowHeight(height);
     }, [hydrated, settings.showTodo]);
 
     /*
-     * While persisted data is loading, render a transparent surface.
-     *
-     * This prevents the main interface from briefly appearing with
-     * default values before the stored settings are available.
+     * The application starts with a transparent WebView while persisted
+     * settings are being loaded.
      */
     if (!hydrated) {
-        return <div className="h-full w-full bg-transparent" />;
+        return (
+            <div className="h-full w-full bg-transparent" />
+        );
     }
 
-    // Converts the saved opacity preset into the visual contrast mode.
-    const contrastMode = resolveContrastMode(settings.opacity);
+    // Resolves the appropriate text contrast mode.
+    const contrastMode = resolveContrastMode(
+        settings.opacity,
+    );
 
-    // Converts the saved opacity value into the alpha used by the surface.
+    // Converts the opacity percentage into an alpha value.
     const alpha = opacityToAlpha(settings.opacity);
 
     /*
-     * The CSS scale differs depending on whether the to-do list is visible.
-     *
-     * Both classes preserve the same visual proportions while allowing
-     * the native window to use the dimensions defined above.
+     * Selects the correct scaled layout depending on whether the
+     * to-do list is enabled.
      */
     const appScaleClass = settings.showTodo
         ? "app-scale"
         : "app-scale-no-todo";
+
+    /*
+     * When native blur is enabled, the WebView surface must remain
+     * sufficiently translucent for the native material to be visible.
+     *
+     * The operating system performs the actual background blur.
+     */
+    const surfaceAlpha = settings.blurBackground
+        ? Math.min(alpha * 100, 28)
+        : alpha * 100;
+
+    /*
+     * Provides a subtle shadow around the application.
+     *
+     * No CSS border or inset highlight is applied here because the
+     * native background effect already provides the window surface.
+     */
+    const glassShadow =
+        "0 18px 40px rgba(0, 0, 0, 0.45)";
 
     return (
         <div className={appScaleClass}>
@@ -143,35 +152,33 @@ export default function App() {
                 className={`relative h-full w-full overflow-hidden rounded-cozy contrast-${contrastMode}`}
                 style={{
                     /*
-                     * The main surface respects the user's transparency
-                     * preference while keeping the Settings panel itself
-                     * opaque.
+                     * The surface stays translucent so the native
+                     * background effect can remain visible.
                      */
-                    backgroundColor: `color-mix(in srgb, var(--surface) ${alpha * 100}%, transparent)`,
+                    backgroundColor:
+                        `color-mix(in srgb, var(--surface) ${surfaceAlpha}%, transparent)`,
 
-                    // Adds the blurred glass-like background effect.
-                    backdropFilter: "blur(16px)",
-                    WebkitBackdropFilter: "blur(16px)",
+                    /*
+                     * CSS backdrop-filter is intentionally not used.
+                     *
+                     * It cannot reliably blur the actual desktop content
+                     * outside the WebView/native window.
+                     */
+                    border: "none",
 
-                    // Gives the compact floating window visual separation.
-                    boxShadow:
-                        "0 18px 40px rgba(0, 0, 0, 0.45)",
+                    // Applies the application's visual depth.
+                    boxShadow: glassShadow,
                 }}
                 onMouseDown={handleDragStart}
             >
-                {/* Native-style window controls. */}
                 <TitleBarControls
                     pinned={pinned}
                     onTogglePin={togglePin}
-                    onOpenSettings={() => setSettingsOpen(true)}
+                    onOpenSettings={() =>
+                        setSettingsOpen(true)
+                    }
                 />
 
-                {/*
-                 * Main application content.
-                 *
-                 * The interface is hidden while Settings is open so
-                 * the Settings panel can occupy the complete window.
-                 */}
                 {!settingsOpen && (
                     <div className="flex h-full w-full flex-col gap-8 px-4 pb-2 pt-8">
                         <div
@@ -181,26 +188,24 @@ export default function App() {
                                     : ""
                             }`}
                         >
-                            {/* Animated slime companion. */}
                             <SlimeStage />
-
-                            {/* Current Pomodoro mode, cycle and time. */}
                             <TimerDisplay />
                         </div>
 
-                        {/* Optional compact to-do list. */}
-                        {settings.showTodo && <TodoList />}
+                        {settings.showTodo && (
+                            <TodoList />
+                        )}
                     </div>
                 )}
 
-                {/*
-                 * Settings is rendered over the complete application
-                 * surface and has its own scrolling behavior.
-                 */}
                 {settingsOpen && (
                     <SettingsPanel
-                        onClose={() => setSettingsOpen(false)}
-                        onForceUnpin={() => void setPin(false)}
+                        onClose={() =>
+                            setSettingsOpen(false)
+                        }
+                        onForceUnpin={() =>
+                            void setPin(false)
+                        }
                     />
                 )}
             </div>

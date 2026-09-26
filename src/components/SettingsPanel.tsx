@@ -134,6 +134,11 @@ export function SettingsPanel({
     // Updates the window transparency percentage.
     const setOpacity = useAppStore((s) => s.setOpacity);
 
+    // Toggles the native background blur effect.
+    const toggleBlurBackground = useAppStore(
+        (s) => s.toggleBlurBackground,
+    );
+
     // Toggles visibility of the to-do list.
     const toggleShowTodo = useAppStore(
         (s) => s.toggleShowTodo,
@@ -226,6 +231,13 @@ export function SettingsPanel({
                         }
                         className="w-full accent-[var(--accent)]"
                         aria-label="Window opacity"
+                    />
+
+                    {/* Enables the native platform blur behind the window. */}
+                    <Toggle
+                        checked={settings.blurBackground}
+                        onChange={toggleBlurBackground}
+                        label="Background blur"
                     />
 
                     {/* Warns the user that lower transparency values can reduce readability. */}
