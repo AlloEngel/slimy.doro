@@ -112,6 +112,9 @@ interface AppState {
     // Advances the timer by one second.
     tick: () => void;
 
+    // Resets the current Pomodoro cycle counter to one.
+    resetCycles: () => void;
+
     // Clears the latest slime animation event.
     clearLastEvent: () => void;
 }
@@ -633,6 +636,15 @@ export const useAppStore = create<AppState>((set) => ({
                     id: ++eventCounter,
                 },
             };
+        }),
+
+    /**
+     * Resets the Pomodoro cycle counter to one without
+     * changing the current session, timer, or timer settings.
+     */
+    resetCycles: () =>
+        set({
+            cycle: 1,
         }),
 
     /**
