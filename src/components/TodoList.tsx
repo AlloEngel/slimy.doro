@@ -53,7 +53,9 @@ export function TodoList() {
     const [draggedId, setDraggedId] = useState<string | null>(null);
 
     // Prevents adding more tasks after reaching the global limit.
-    const atLimit = tasks.length >= MAX_TASKS;
+    const atLimit =
+        tasks.length >= MAX_TASKS &&
+        !tasks.some((task) => task.done);
 
     // Maximum number of characters allowed in a task title.
     const TASK_TITLE_MAX_LENGTH = 36;

@@ -114,7 +114,6 @@ interface AppState {
 
     // Clears the latest slime animation event.
     clearLastEvent: () => void;
-
 }
 
 /**
@@ -309,13 +308,37 @@ export const useAppStore = create<AppState>((set) => ({
      *
      * Empty titles are ignored, and the global MAX_TASKS limit is
      * enforced here regardless of whether the UI has disabled the input.
+     *
+     * When the list is full, the first completed task is automatically
+     * removed to make room for the new task. If all tasks are still
+     * active, the new task is rejected.
      */
     addTask: (title) =>
         set((state) => {
             const trimmed = title.trim();
 
-            if (!trimmed || state.tasks.length >= MAX_TASKS) {
+            if (!trimmed) {
                 return state;
+            }
+
+            let existingTasks = state.tasks;
+
+            // When the task limit has been reached, remove the first
+            // completed task so the new task can take its place.
+            if (existingTasks.length >= MAX_TASKS) {
+                const completedIndex = existingTasks.findIndex(
+                    (task) => task.done,
+                );
+
+                // If there are no completed tasks, the list is full
+                // of active tasks and no new task can be added.
+                if (completedIndex === -1) {
+                    return state;
+                }
+
+                existingTasks = existingTasks.filter(
+                    (_, index) => index !== completedIndex,
+                );
             }
 
             const task: Task = {
@@ -326,7 +349,7 @@ export const useAppStore = create<AppState>((set) => ({
                 createdAt: Date.now(),
             };
 
-            const tasks = [task, ...state.tasks];
+            const tasks = [task, ...existingTasks];
 
             persistTasks(tasks);
 
@@ -340,28 +363,81 @@ export const useAppStore = create<AppState>((set) => ({
     /**
      * Toggles whether a task is marked as completed.
      *
+     * Completing a task moves it to the end of the task list so that
+     * completed tasks remain below active tasks.
+     *
+     * Reopening a completed task moves it back to the beginning of
+     * the active task section, before the remaining completed tasks.
+     *
      * Completing a task also triggers the slime's jump animation
      * and optionally plays the task completion sound.
      */
     toggleTaskDone: (id) =>
         set((state) => {
-            const tasks = state.tasks.map((task) =>
-                task.id === id
-                    ? {
-                        ...task,
-                        done: !task.done,
-                    }
-                    : task,
+            const taskIndex = state.tasks.findIndex(
+                (task) => task.id === id,
             );
+
+            if (taskIndex === -1) {
+                return state;
+            }
+
+            const task = state.tasks[taskIndex];
+            const willBeDone = !task.done;
+
+            // Remove the task from its current position before
+            // placing it in its new active or completed section.
+            const remainingTasks = state.tasks.filter(
+                (currentTask) => currentTask.id !== id,
+            );
+
+            let tasks: Task[];
+
+            if (willBeDone) {
+                // Completed tasks are always placed at the end.
+                tasks = [
+                    ...remainingTasks,
+                    {
+                        ...task,
+                        done: true,
+                    },
+                ];
+            } else {
+                // Reopened tasks return to the beginning of the
+                // active section, before all completed tasks.
+                const firstCompletedIndex =
+                    remainingTasks.findIndex(
+                        (currentTask) => currentTask.done,
+                    );
+
+                const updatedTask = {
+                    ...task,
+                    done: false,
+                };
+
+                if (firstCompletedIndex === -1) {
+                    tasks = [
+                        updatedTask,
+                        ...remainingTasks,
+                    ];
+                } else {
+                    tasks = [
+                        ...remainingTasks.slice(
+                            0,
+                            firstCompletedIndex,
+                        ),
+                        updatedTask,
+                        ...remainingTasks.slice(
+                            firstCompletedIndex,
+                        ),
+                    ];
+                }
+            }
 
             persistTasks(tasks);
 
-            const justCompleted = tasks.find(
-                (task) => task.id === id,
-            )?.done;
-
             if (
-                justCompleted &&
+                willBeDone &&
                 state.settings.soundEnabled
             ) {
                 playTaskComplete();
@@ -369,7 +445,7 @@ export const useAppStore = create<AppState>((set) => ({
 
             return {
                 tasks,
-                lastEvent: justCompleted
+                lastEvent: willBeDone
                     ? {
                         kind: "jump",
                         id: ++eventCounter,
@@ -521,6 +597,7 @@ export const useAppStore = create<AppState>((set) => ({
 
             return { tasks };
         }),
+
     startPause: () =>
         set((state) => {
             const isRunning = !state.isRunning;
@@ -659,7 +736,7 @@ function computeAdvance(
             settings,
         ),
         isRunning:
-        settings.timer.autoStartNext,
+            settings.timer.autoStartNext,
         lastEvent: completed
             ? {
                 kind: "jump",
