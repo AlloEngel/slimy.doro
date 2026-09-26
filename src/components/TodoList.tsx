@@ -248,7 +248,7 @@ export function TodoList() {
                 The order here is exactly the order stored in the Zustand store.
                 Tasks can be reordered using either the chevrons or drag and drop.
             */}
-            <ul className="flex min-h-0 flex-1 flex-col gap-0.3 overflow-y-auto pr-1">
+            <ul className="flex min-h-0 flex-1 flex-col gap-0.3 overflow-y-auto">
                 {/* Empty-state message shown when there are no tasks. */}
                 {tasks.length === 0 && (
                     <li className="pt-1 text-sm italic leading-snug text-current/50">
@@ -271,140 +271,100 @@ export function TodoList() {
                         <li
                             key={task.id}
                             draggable
-                            onDragStart={(e) =>
-                                handleDragStart(e, task.id)
-                            }
+                            onDragStart={(e) => handleDragStart(e, task.id)}
                             onDragOver={handleDragOver}
-                            onDrop={(e) =>
-                                handleDrop(e, index)
-                            }
+                            onDrop={(e) => handleDrop(e, index)}
                             onDragEnd={handleDragEnd}
-                            className={`group flex cursor-grab items-start gap-1.5 rounded-lg px-1 py-1.5 transition hover:bg-black/5 active:cursor-grabbing ${
+                            className={`group flex cursor-grab items-start gap-1.5 rounded-lg py-1.5 transition hover:bg-black/5 active:cursor-grabbing ${
                                 task.done ? "opacity-50" : ""
-                            } ${
-                                isDragging
-                                    ? "opacity-40"
-                                    : ""
-                            }`}
+                            } ${isDragging ? "opacity-40" : ""}`}
                         >
-                            {/* Completion checkbox. */}
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    toggleTaskDone(task.id)
-                                }
-                                aria-label={`Mark "${task.title}" ${
-                                    task.done ? "not done" : "done"
-                                }`}
-                                className={`h-3.5 w-3.5 shrink-0 rounded-[4px] border transition ${
-                                    task.done
-                                        ? "border-[var(--accent)] bg-[var(--accent)]"
-                                        : "border-current/40 hover:border-[var(--accent)]"
-                                }`}
-                            />
-
-                            {/* Task title or inline rename field. */}
-                            {editingId === task.id ? (
-                                <input
-                                    autoFocus
-                                    value={editValue}
-                                    onChange={(e) =>
-                                        setEditValue(
-                                            e.target.value,
-                                        )
-                                    }
-                                    maxLength={TASK_TITLE_MAX_LENGTH}
-                                    onBlur={commitEdit}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            commitEdit();
-                                        }
-
-                                        if (e.key === "Escape") {
-                                            setEditingId(null);
-                                        }
-                                    }}
-                                    className={`min-w-0 flex-1 rounded bg-black/5 px-1 text-[15px] text-current focus:outline-none ${
-                                        editValue.length ===
-                                        TASK_TITLE_MAX_LENGTH
-                                            ? "ring-1 ring-[var(--accent)]"
-                                            : ""
+                            {/* Main task content with left padding aligned to the input text. */}
+                            <div className="flex min-w-0 flex-1 items-start gap-1.5 pl-1.5">
+                                {/* Completion checkbox. */}
+                                <button
+                                    type="button"
+                                    onClick={() => toggleTaskDone(task.id)}
+                                    aria-label={`Mark "${task.title}" ${
+                                        task.done ? "not done" : "done"
+                                    }`}
+                                    className={`h-3.5 w-3.5 shrink-0 rounded-[4px] border transition ${
+                                        task.done
+                                            ? "border-[var(--accent)] bg-[var(--accent)]"
+                                            : "border-current/40 hover:border-[var(--accent)]"
                                     }`}
                                 />
-                            ) : (
-                                <button
-                                    type="button"
-                                    onDoubleClick={() =>
-                                        beginEdit(task)
-                                    }
-                                    className={`min-w-0 flex-1 break-all text-left text-[15px] leading-[1.2] text-current/90 ${
-                                        task.done
-                                            ? "line-through"
-                                            : ""
-                                    }`}
-                                    title="Double-click to rename"
-                                >
-                                    {task.title}
-                                </button>
-                            )}
 
-                            {/*
-                                Manual ordering controls.
-                                They remain hidden until the task row is hovered,
-                                matching the favorite and delete buttons.
-                            */}
+                                {/* Task title or inline rename field. */}
+                                {editingId === task.id ? (
+                                    <input
+                                        autoFocus
+                                        value={editValue}
+                                        onChange={(e) => setEditValue(e.target.value)}
+                                        maxLength={TASK_TITLE_MAX_LENGTH}
+                                        onBlur={commitEdit}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") {
+                                                commitEdit();
+                                            }
+
+                                            if (e.key === "Escape") {
+                                                setEditingId(null);
+                                            }
+                                        }}
+                                        className={`min-w-0 flex-1 rounded bg-black/5 px-1 text-[15px] text-current focus:outline-none ${
+                                            editValue.length === TASK_TITLE_MAX_LENGTH
+                                                ? "ring-1 ring-[var(--accent)]"
+                                                : ""
+                                        }`}
+                                    />
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onDoubleClick={() => beginEdit(task)}
+                                        className={`min-w-0 flex-1 break-all text-left text-[15px] leading-[1.2] text-current/90 ${
+                                            task.done ? "line-through" : ""
+                                        }`}
+                                        title="Double-click to rename"
+                                    >
+                                        {task.title}
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Manual task ordering controls. */}
                             <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-                                {/* Move task up. Disabled for the first task. */}
+                                {/* Move task up. */}
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        handleMoveUp(task.id)
-                                    }
+                                    onClick={() => handleMoveUp(task.id)}
                                     disabled={isFirst}
                                     aria-label={`Move "${task.title}" up`}
                                     title="Move task up"
                                     className="flex h-5 w-5 items-center justify-center rounded transition hover:bg-black/10 disabled:cursor-not-allowed disabled:opacity-20"
                                 >
-                                    <ChevronUp
-                                        size={16}
-                                        strokeWidth={2.25}
-                                    />
+                                    <ChevronUp size={16} strokeWidth={2.25} />
                                 </button>
 
-                                {/* Move task down. Disabled for the last task. */}
+                                {/* Move task down. */}
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        handleMoveDown(task.id)
-                                    }
+                                    onClick={() => handleMoveDown(task.id)}
                                     disabled={isLast}
                                     aria-label={`Move "${task.title}" down`}
                                     title="Move task down"
                                     className="flex h-5 w-5 items-center justify-center rounded transition hover:bg-black/10 disabled:cursor-not-allowed disabled:opacity-20"
                                 >
-                                    <ChevronDown
-                                        size={16}
-                                        strokeWidth={2.25}
-                                    />
+                                    <ChevronDown size={16} strokeWidth={2.25} />
                                 </button>
                             </div>
 
                             {/* Favorite toggle. */}
                             <button
                                 type="button"
-                                onClick={() =>
-                                    toggleTaskFavorite(task.id)
-                                }
-                                aria-label={
-                                    task.favorite
-                                        ? "Unfavorite"
-                                        : "Favorite"
-                                }
-                                title={
-                                    task.favorite
-                                        ? "Unfavorite"
-                                        : "Favorite"
-                                }
+                                onClick={() => toggleTaskFavorite(task.id)}
+                                aria-label={task.favorite ? "Unfavorite" : "Favorite"}
+                                title={task.favorite ? "Unfavorite" : "Favorite"}
                                 className={`flex h-5 w-5 shrink-0 items-center justify-center transition ${
                                     task.favorite
                                         ? "opacity-100"
@@ -424,9 +384,7 @@ export function TodoList() {
                             {/* Task deletion button. */}
                             <button
                                 type="button"
-                                onClick={() =>
-                                    deleteTask(task.id)
-                                }
+                                onClick={() => deleteTask(task.id)}
                                 aria-label="Delete task"
                                 title="Delete task"
                                 className="flex h-5 w-5 shrink-0 items-center justify-center text-current/50 opacity-0 transition hover:text-[var(--accent)] group-hover:opacity-100 focus:opacity-100"
