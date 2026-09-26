@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { RotateCcw, ShieldAlert, X } from "lucide-react";
+import { RotateCcw, X } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { snapWindow } from "@/lib/tauri";
 import type { SnapPosition } from "@/types";
@@ -114,17 +114,13 @@ function SectionHeading({
 
 interface Props {
     onClose: () => void;
-    onForceUnpin: () => void;
 }
 
 /**
  * Settings panel for configuring the application's appearance,
  * window behavior, general features, and Pomodoro timer.
  */
-export function SettingsPanel({
-                                  onClose,
-                                  onForceUnpin,
-                              }: Props) {
+export function SettingsPanel({ onClose }: Props) {
     // Reads the current application settings from the Zustand store.
     const settings = useAppStore((s) => s.settings);
 
@@ -440,29 +436,25 @@ export function SettingsPanel({
                         </p>
                     </section>
 
-                    {/* Force Unpin */}
-                    <section className="rounded-lg bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] p-3">
-                        <button
-                            type="button"
-                            onClick={onForceUnpin}
-                            className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--accent)] py-2.5 text-[14px] font-bold uppercase tracking-wide text-[var(--on-accent)] transition hover:brightness-105 active:scale-[0.98]"
-                        >
-                            <ShieldAlert size={17} />
-                            Force Unpin Window
-                        </button>
-
-                        <p className="mt-2 text-center text-[13px] leading-relaxed text-[var(--text)]/75">
-                            Also available via tray menu, or{" "}
-                            <strong className="font-mono font-bold text-[var(--text-deep)]">
+                    {/* Pin Mode shortcut */}
+                    <section className="rounded-lg bg-[var(--accent)] p-3">
+                        <p className="text-center text-[13px] leading-relaxed text-[var(--on-accent)]">
+                            To disable Pin Mode, use{" "}
+                            <strong className="font-mono font-bold">
                                 Ctrl+Shift+U
                             </strong>{" "}
                             (
-                            <strong className="font-mono font-bold text-[var(--text-deep)]">
+                            <strong className="font-mono font-bold">
                                 Cmd+Shift+U
                             </strong>{" "}
                             on macOS).
                         </p>
                     </section>
+
+                    {/* Application version */}
+                    <p className="text-center text-[10px] text-[var(--text)]/40">
+                        slimy.doro v1.0
+                    </p>
                 </div>
             </div>
         </div>
