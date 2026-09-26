@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
-use tauri::{Monitor, PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
+use tauri::{
+    LogicalSize,
+    Monitor,
+    PhysicalPosition,
+    Runtime,
+    WebviewWindow,
+};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -58,8 +64,12 @@ pub fn snap_window<R: Runtime>(
     let work_area = monitor.work_area();
 
     /*
-     * The native window is now the same size as the visible application.
-     * There is no CSS transform to compensate for here.
+     * The native window is sized using logical dimensions, but its
+     * physical size depends on the monitor's DPI scale.
+     *
+     * For positioning, however, the monitor work area and native
+     * window position are expressed in physical pixels, so the
+     * existing physical positioning logic remains appropriate.
      */
     let window_size = window
         .outer_size()
@@ -115,31 +125,52 @@ pub fn snap_window<R: Runtime>(
 }
 
 // Kept for compatibility with the existing frontend/command registration.
+//
+// The width is now interpreted as a logical/CSS pixel value instead
+// of a physical pixel value. This prevents Windows DPI scaling from
+// shrinking the WebView viewport on monitors using 125%, 150%, etc.
 #[tauri::command]
 pub fn set_window_width<R: Runtime>(
     window: WebviewWindow<R>,
     width: f64,
 ) -> Result<(), String> {
-    let size = window
+    let scale_factor = window
+        .scale_factor()
+        .map_err(|e| e.to_string())?;
+
+    let physical_size = window
         .outer_size()
         .map_err(|e| e.to_string())?;
 
+    let logical_size = physical_size.to_logical::<f64>(scale_factor);
+
     window
-        .set_size(PhysicalSize::new(width as u32, size.height))
+        .set_size(LogicalSize::new(width, logical_size.height))
         .map_err(|e| e.to_string())
 }
 
+// Kept for compatibility with the existing frontend/command registration.
+//
+// The height is now interpreted as a logical/CSS pixel value instead
+// of a physical pixel value. This keeps the application's CSS layout
+// consistent across monitors with different DPI scaling.
 #[tauri::command]
 pub fn set_window_height<R: Runtime>(
     window: WebviewWindow<R>,
     height: f64,
 ) -> Result<(), String> {
-    let size = window
+    let scale_factor = window
+        .scale_factor()
+        .map_err(|e| e.to_string())?;
+
+    let physical_size = window
         .outer_size()
         .map_err(|e| e.to_string())?;
 
+    let logical_size = physical_size.to_logical::<f64>(scale_factor);
+
     window
-        .set_size(PhysicalSize::new(size.width, height as u32))
+        .set_size(LogicalSize::new(logical_size.width, height))
         .map_err(|e| e.to_string())
 }
 

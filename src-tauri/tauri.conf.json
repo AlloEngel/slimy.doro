@@ -1,51 +1,67 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/v2/crates/tauri-config-schema/schema.json",
+
   "productName": "Pixel Slime Pomodoro",
   "version": "1.0.0",
   "identifier": "com.cozyware.pixelslimepomodoro",
+
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
+
   "app": {
     "windows": [
       {
         "label": "main",
         "title": "Pixel Slime Pomodoro",
-        "width": 189,
-        "height": 224,
-        "minWidth": 189,
-        "minHeight": 175,
-        "maxWidth": 189,
-        "maxHeight": 224,
+
+        "width": 231,
+        "height": 382,
+
+        "minWidth": 231,
+        "minHeight": 230,
+
+        "maxWidth": 231,
+        "maxHeight": 382,
+
         "resizable": false,
         "maximizable": false,
         "minimizable": true,
         "closable": true,
+
         "decorations": false,
         "transparent": true,
         "shadow": false,
+
         "alwaysOnTop": false,
+
         "skipTaskbar": false,
+
         "center": false,
+
         "visible": true,
         "dragDropEnabled": false
       }
     ],
+
     "security": {
       "csp": null
     },
+
     "trayIcon": {
       "iconPath": "icons/icon.png",
       "iconAsTemplate": true,
       "tooltip": "Pixel Slime Pomodoro"
     }
   },
+
   "bundle": {
     "active": true,
     "targets": "all",
+
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
