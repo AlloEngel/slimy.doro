@@ -227,7 +227,13 @@ export function SettingsPanel({
                                     Window opacity
                                 </span>
 
-                                <span className="font-mono text-[15px] font-bold text-[var(--text-deep)]">
+                                <span
+                                    className={`font-mono text-[15px] font-bold ${
+                                        settings.blurBackground
+                                            ? "text-[var(--text-deep)]/40"
+                                            : "text-[var(--text-deep)]"
+                                    }`}
+                                >
                                     {settings.opacity}%
                                 </span>
                             </div>
@@ -236,16 +242,26 @@ export function SettingsPanel({
                                 type="range"
                                 min={0}
                                 max={100}
-                                step={10}
+                                step={25}
                                 value={settings.opacity}
                                 onChange={(e) =>
                                     setOpacity(
                                         Number(e.target.value),
                                     )
                                 }
-                                className="w-full accent-[var(--accent)]"
+                                disabled={settings.blurBackground}
+                                className="w-full accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-30"
                                 aria-label="Window opacity"
+                                aria-disabled={settings.blurBackground}
                             />
+
+                            {/* Warns the user when low transparency may reduce readability. */}
+                            {settings.opacity <= 50 && (
+                                <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]/70">
+                                    Lower transparency may make the
+                                    interface harder to read.
+                                </p>
+                            )}
 
                             {/* Enables the native platform blur behind the window. */}
                             <Toggle
@@ -254,11 +270,10 @@ export function SettingsPanel({
                                 label="Background blur"
                             />
 
-                            {/* Warns the user that lower transparency values can reduce readability. */}
-                            {settings.opacity <= 50 && (
-                                <p className="text-[13px] leading-relaxed text-[var(--text)]/70">
-                                    Lower transparency may make the
-                                    interface harder to read.
+                            {/* Explains that Blur Mode uses a translucent window surface. */}
+                            {settings.blurBackground && (
+                                <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]/70">
+                                    Blur mode uses a translucent window surface.
                                 </p>
                             )}
                         </div>
