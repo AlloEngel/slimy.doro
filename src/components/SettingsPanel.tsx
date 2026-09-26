@@ -178,7 +178,7 @@ export function SettingsPanel({ onClose, onForceUnpin }: Props) {
                     type="range"
                     min={0}
                     max={100}
-                    step={5}
+                    step={10}
                     value={settings.opacity}
                     onChange={(e) => setOpacity(Number(e.target.value))}
                     className="w-full accent-[var(--accent)]"
