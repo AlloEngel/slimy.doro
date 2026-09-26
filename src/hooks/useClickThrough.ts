@@ -3,43 +3,42 @@
 // to false — it's the "get me unstuck" button, not a toggle.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { setPinMode, isTauri } from "@/lib/tauri";
+import { setPinMode, setAlwaysOnTop, isTauri } from "@/lib/tauri";
 
-export function useClickThrough() {
-  const [pinned, setPinned] = useState(false);
-  const pinnedRef = useRef(pinned);
-  pinnedRef.current = pinned;
 
-  const setPin = useCallback(async (next: boolean) => {
-    setPinned(next);
-    await setPinMode(next);
-  }, []);
+export function useClickThrough(alwaysOnTop: boolean) {
+  {
+    const [pinned, setPinned] = useState(false);
+    const pinnedRef = useRef(pinned);
+    pinnedRef.current = pinned;
 
-  const togglePin = useCallback(() => {
-    void setPin(!pinnedRef.current);
-  }, [setPin]);
+    const setPin = useCallback(async (next: boolean) => {
+      setPinned(next);
+      await setPinMode(next);
+    }, []);
 
-  useEffect(() => {
-    if (!isTauri) return;
-    const unlisteners: Array<() => void> = [];
+    const togglePin = useCallback(() => {
+      void setPin(!pinnedRef.current);
+    }, [setPin, alwaysOnTop]);
 
-    getCurrentWindow()
-        .listen("tray://toggle-pin", () => {
-          void setPin(!pinnedRef.current);
-        })
-        .then((fn) => unlisteners.push(fn));
+    useEffect(() => {
+      if (!isTauri) return;
+      const unlisteners: Array<() => void> = [];
 
-    // Emergency unpin (global shortcut) — always forces unpinned,
-    // regardless of current state, and syncs the React side after
-    // the Rust side has already cleared click-through/always-on-top.
-    getCurrentWindow()
-        .listen("shortcut://force-unpin", () => {
-          setPinned(false);
-        })
-        .then((fn) => unlisteners.push(fn));
+      getCurrentWindow()
+          .listen("shortcut://force-unpin", async () => {
+            // The Rust shortcut handler already disables click-through
+            // and temporarily disables Always on Top to recover the window.
+            setPinned(false);
 
-    return () => unlisteners.forEach((fn) => fn());
-  }, [setPin]);
+            // Restore the user's persisted Always on Top preference.
+            await setAlwaysOnTop(alwaysOnTop);
+          })
+          .then((fn) => unlisteners.push(fn));
 
-  return { pinned, togglePin, setPin };
+      return () => unlisteners.forEach((fn) => fn());
+    }, [setPin, alwaysOnTop]);
+
+    return {pinned, togglePin, setPin};
+  }
 }

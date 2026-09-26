@@ -40,7 +40,9 @@ export default function App() {
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Provides the native click-through/pin state and its controls.
-    const { pinned, togglePin, setPin } = useClickThrough();
+    const { pinned, togglePin, setPin } = useClickThrough(
+        settings.alwaysOnTop,
+    );
 
     // Handles dragging the native application window.
     const handleDragStart = useWindowDrag();
