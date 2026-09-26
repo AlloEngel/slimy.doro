@@ -209,10 +209,10 @@ export function TodoList() {
                     placeholder={
                         atLimit
                             ? "Task limit reached"
-                            : "Add a task..."
+                            : "Type a task to add..."
                     }
                     disabled={atLimit}
-                    className={`w-full min-w-0 rounded-md bg-black/5 px-2.5 py-1.5 text-[15px] text-current placeholder:text-current/40 focus:bg-black/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`w-full min-w-0 rounded-md bg-black/20 px-2.5 py-1.5 text-[15px] text-current placeholder:text-current/50 focus:bg-black/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
                         draft.length === TASK_TITLE_MAX_LENGTH
                             ? "ring-1 ring-[var(--accent)]"
                             : ""
