@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type DragEvent, type FormEvent } from "react";
 import {
     ChevronDown,
     ChevronUp,
@@ -36,6 +36,10 @@ export function TodoList() {
     // Moves a task one position downward.
     const moveTaskDown = useAppStore((s) => s.moveTaskDown);
 
+    // Moves a task directly to another position.
+    // This is used by drag and drop.
+    const moveTask = useAppStore((s) => s.moveTask);
+
     // Temporary value used by the new-task input.
     const [draft, setDraft] = useState("");
 
@@ -44,6 +48,9 @@ export function TodoList() {
 
     // Temporary value used while renaming a task.
     const [editValue, setEditValue] = useState("");
+
+    // ID of the task currently being dragged.
+    const [draggedId, setDraggedId] = useState<string | null>(null);
 
     // Prevents adding more tasks after reaching the global limit.
     const atLimit = tasks.length >= MAX_TASKS;
@@ -91,23 +98,76 @@ export function TodoList() {
     };
 
     /**
-     * Moves a task upward by one position.
+     * Moves a task one position upward.
      *
-     * The store itself also protects against moving the first task,
-     * but checking the index here allows the UI to disable the button.
+     * The store also protects against moving the first task,
+     * while the UI disables the button for the first item.
      */
     const handleMoveUp = (taskId: string) => {
         moveTaskUp(taskId);
     };
 
     /**
-     * Moves a task downward by one position.
+     * Moves a task one position downward.
      *
-     * The store itself protects against moving the last task,
-     * while the UI disables the button when appropriate.
+     * The store also protects against moving the last task,
+     * while the UI disables the button for the last item.
      */
     const handleMoveDown = (taskId: string) => {
         moveTaskDown(taskId);
+    };
+
+    /**
+     * Starts dragging a task.
+     *
+     * The task ID is stored both locally and in the browser's
+     * drag-and-drop data transfer object.
+     */
+    const handleDragStart = (
+        e: DragEvent<HTMLLIElement>,
+        taskId: string,
+    ) => {
+        setDraggedId(taskId);
+
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", taskId);
+    };
+
+    /**
+     * Allows a task row to receive another dragged task.
+     *
+     * preventDefault is required for the drop event to work.
+     */
+    const handleDragOver = (e: DragEvent<HTMLLIElement>) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    };
+
+    /**
+     * Moves the dragged task to the position of the task
+     * on which it was dropped.
+     */
+    const handleDrop = (
+        e: DragEvent<HTMLLIElement>,
+        targetIndex: number,
+    ) => {
+        e.preventDefault();
+
+        const taskId = e.dataTransfer.getData("text/plain");
+
+        if (!taskId) {
+            return;
+        }
+
+        moveTask(taskId, targetIndex);
+        setDraggedId(null);
+    };
+
+    /**
+     * Clears the drag state after the drag operation ends.
+     */
+    const handleDragEnd = () => {
+        setDraggedId(null);
     };
 
     return (
@@ -166,7 +226,11 @@ export function TodoList() {
                 </p>
             )}
 
-            {/* Task list. Its content scrolls when more tasks exist than fit in the window. */}
+            {/*
+                Task list.
+                The order here is exactly the order stored in the Zustand store.
+                Tasks can be reordered using either the chevrons or drag and drop.
+            */}
             <ul className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
                 {/* Empty-state message shown when there are no tasks. */}
                 {tasks.length === 0 && (
@@ -177,14 +241,33 @@ export function TodoList() {
 
                 {/* Tasks are rendered directly in their manually stored order. */}
                 {tasks.map((task, index) => {
+                    // Determines whether this is the first task in the list.
                     const isFirst = index === 0;
+
+                    // Determines whether this is the last task in the list.
                     const isLast = index === tasks.length - 1;
+
+                    // Determines whether this task is currently being dragged.
+                    const isDragging = draggedId === task.id;
 
                     return (
                         <li
                             key={task.id}
-                            className={`group flex items-center gap-1.5 rounded-lg px-1 py-1.5 transition hover:bg-black/5 ${
+                            draggable
+                            onDragStart={(e) =>
+                                handleDragStart(e, task.id)
+                            }
+                            onDragOver={handleDragOver}
+                            onDrop={(e) =>
+                                handleDrop(e, index)
+                            }
+                            onDragEnd={handleDragEnd}
+                            className={`group flex cursor-grab items-center gap-1.5 rounded-lg px-1 py-1.5 transition hover:bg-black/5 active:cursor-grabbing ${
                                 task.done ? "opacity-50" : ""
+                            } ${
+                                isDragging
+                                    ? "opacity-40"
+                                    : ""
                             }`}
                         >
                             {/* Completion checkbox. */}
@@ -209,7 +292,9 @@ export function TodoList() {
                                     autoFocus
                                     value={editValue}
                                     onChange={(e) =>
-                                        setEditValue(e.target.value)
+                                        setEditValue(
+                                            e.target.value,
+                                        )
                                     }
                                     onBlur={commitEdit}
                                     onKeyDown={(e) => {
@@ -240,11 +325,18 @@ export function TodoList() {
                                 </button>
                             )}
 
-                            {/* Manual task ordering controls. */}
+                            {/*
+                                Manual ordering controls.
+                                They remain hidden until the task row is hovered,
+                                matching the favorite and delete buttons.
+                            */}
                             <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                                {/* Move task up. Disabled for the first task. */}
                                 <button
                                     type="button"
-                                    onClick={() => handleMoveUp(task.id)}
+                                    onClick={() =>
+                                        handleMoveUp(task.id)
+                                    }
                                     disabled={isFirst}
                                     aria-label={`Move "${task.title}" up`}
                                     title="Move task up"
@@ -256,9 +348,12 @@ export function TodoList() {
                                     />
                                 </button>
 
+                                {/* Move task down. Disabled for the last task. */}
                                 <button
                                     type="button"
-                                    onClick={() => handleMoveDown(task.id)}
+                                    onClick={() =>
+                                        handleMoveDown(task.id)
+                                    }
                                     disabled={isLast}
                                     aria-label={`Move "${task.title}" down`}
                                     title="Move task down"

@@ -97,6 +97,9 @@ interface AppState {
     // Moves a task one position downward.
     moveTaskDown: (id: string) => void;
 
+    // Moves a task with mouse drag.
+    moveTask: (taskId: string, targetIndex: number) => void;
+
     // Starts or pauses the current Pomodoro session.
     startPause: () => void;
 
@@ -111,6 +114,7 @@ interface AppState {
 
     // Clears the latest slime animation event.
     clearLastEvent: () => void;
+
 }
 
 /**
@@ -436,9 +440,7 @@ export const useAppStore = create<AppState>((set) => ({
         }),
 
     /**
-     * Moves a task one position upward in the manually ordered list.
-     *
-     * If the task is already the first item, no state change occurs.
+     * Moves a task one position upward.
      */
     moveTaskUp: (id) =>
         set((state) => {
@@ -463,9 +465,7 @@ export const useAppStore = create<AppState>((set) => ({
         }),
 
     /**
-     * Moves a task one position downward in the manually ordered list.
-     *
-     * If the task is already the last item, no state change occurs.
+     * Moves a task one position downward.
      */
     moveTaskDown: (id) =>
         set((state) => {
@@ -493,9 +493,34 @@ export const useAppStore = create<AppState>((set) => ({
         }),
 
     /**
-     * Starts the current timer if it is stopped, or pauses it if
-     * it is currently running.
+     * Moves a task directly to a specific position.
+     *
+     * Used by drag and drop.
      */
+    moveTask: (taskId, targetIndex) =>
+        set((state) => {
+            const currentIndex = state.tasks.findIndex(
+                (task) => task.id === taskId,
+            );
+
+            if (
+                currentIndex === -1 ||
+                targetIndex < 0 ||
+                targetIndex >= state.tasks.length ||
+                currentIndex === targetIndex
+            ) {
+                return state;
+            }
+
+            const tasks = [...state.tasks];
+            const [movedTask] = tasks.splice(currentIndex, 1);
+
+            tasks.splice(targetIndex, 0, movedTask);
+
+            persistTasks(tasks);
+
+            return { tasks };
+        }),
     startPause: () =>
         set((state) => {
             const isRunning = !state.isRunning;
