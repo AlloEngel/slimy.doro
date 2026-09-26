@@ -40,7 +40,7 @@ export default function App() {
      * compatibility, but its native synchronization is handled
      * separately below.
      */
-    const { pinned, togglePin, setPin } = useClickThrough(
+    const { pinned, togglePin } = useClickThrough(
         settings.alwaysOnTop,
     );
 
@@ -62,7 +62,7 @@ export default function App() {
      * have been hydrated.
      *
      * The background effect is applied first and Always on Top is
-     * applied afterwards so the final native window state explicitly
+     * applied afterward so the final native window state explicitly
      * matches the user's persisted preference.
      */
     useEffect(() => {
@@ -248,9 +248,6 @@ export default function App() {
                     <SettingsPanel
                         onClose={() =>
                             setSettingsOpen(false)
-                        }
-                        onForceUnpin={() =>
-                            void setPin(false)
                         }
                     />
                 )}
