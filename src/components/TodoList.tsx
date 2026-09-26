@@ -382,13 +382,17 @@ export function TodoList() {
                                         ? "Unfavorite"
                                         : "Favorite"
                                 }
-                                className="flex h-5 w-5 shrink-0 items-center justify-center opacity-0 transition group-hover:opacity-100 focus:opacity-100"
+                                className={`flex h-5 w-5 shrink-0 items-center justify-center transition ${
+                                    task.favorite
+                                        ? "opacity-100"
+                                        : "opacity-0 group-hover:opacity-100"
+                                }`}
                             >
                                 <Star
                                     size={16}
                                     className={
                                         task.favorite
-                                            ? "fill-[var(--accent)] text-[var(--accent)] opacity-100"
+                                            ? "fill-[var(--accent)] text-[var(--accent)]"
                                             : "text-current/50"
                                     }
                                 />
