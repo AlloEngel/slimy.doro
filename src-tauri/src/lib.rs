@@ -21,18 +21,23 @@ pub fn run() {
      *
      * If the application is launched while another instance is already
      * running, the existing main window is shown and focused instead.
+     *
+     * This prevents multiple independent application instances from
+     * being created by launching the executable more than once.
      */
     #[cfg(desktop)]
     {
         builder = builder.plugin(
-            tauri_plugin_single_instance::init(|app, _args, _cwd| {
-                if let Some(window) =
-                    app.get_webview_window("main")
-                {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
-            }),
+            tauri_plugin_single_instance::init(
+                |app, _args, _cwd| {
+                    if let Some(window) =
+                        app.get_webview_window("main")
+                    {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                },
+            ),
         );
     }
 
@@ -42,9 +47,12 @@ pub fn run() {
      * IMPORTANT:
      * Only the window position is persisted.
      *
-     * The application itself controls its native width and height from
-     * App.tsx because the height changes depending on whether the
-     * to-do list is visible.
+     * The application controls its native width and height from
+     * App.tsx because the height changes depending on the current
+     * application layout.
+     *
+     * Always on Top is also intentionally managed by App.tsx,
+     * based on the persisted Zustand setting.
      *
      * This prevents an old physical window size from being restored
      * after switching monitors or DPI scales.
@@ -150,8 +158,8 @@ pub fn run() {
              * Do not force a startup position here.
              *
              * tauri-plugin-window-state restores the last saved position.
-             * Forcing a position such as BottomRight here would overwrite
-             * that restored position every time the application launches.
+             * Forcing a position here would overwrite that restored
+             * position every time the application launches.
              */
 
             // --- Window icon ---
@@ -167,8 +175,10 @@ pub fn run() {
                     include_bytes!("../icons/128x128.png");
 
                 let icon =
-                    tauri::image::Image::from_bytes(icon_bytes)
-                        .map_err(|e| e.to_string())?;
+                    tauri::image::Image::from_bytes(
+                        icon_bytes,
+                    )
+                    .map_err(|e| e.to_string())?;
 
                 window
                     .set_icon(icon)
@@ -201,11 +211,13 @@ pub fn run() {
 
             /*
              * Creates the native application quit action.
+             *
+             * The visible product name is "slimy.doro".
              */
             let quit =
                 PredefinedMenuItem::quit(
                     app,
-                    Some("Quit Pixel Slime Pomodoro"),
+                    Some("Quit slimy.doro"),
                 )?;
 
             /*
@@ -217,11 +229,19 @@ pub fn run() {
             )?;
 
             /*
-             * Creates the system tray icon and handles its menu events.
+             * Creates the system tray icon.
+             *
+             * The explicit tooltip ensures that Windows displays
+             * "slimy.doro" when the user hovers over the tray icon.
+             *
+             * Only one TrayIconBuilder is created by this setup,
+             * preventing the application from intentionally creating
+             * multiple tray icons.
              */
             TrayIconBuilder::new()
                 .menu(&tray_menu)
                 .show_menu_on_left_click(true)
+                .tooltip("slimy.doro")
                 .icon(
                     app.default_window_icon()
                         .unwrap()
@@ -257,9 +277,9 @@ pub fn run() {
                         /*
                          * Sends the tray pin action to React.
                          *
-                         * React owns the Pin state so the same logic is
-                         * used whether the user clicks the window button
-                         * or the tray menu.
+                         * React owns the Pin state so the same logic
+                         * is used whether the user clicks the window
+                         * button or the tray menu.
                          */
                         "toggle-pin" => {
                             if let Some(window) =
@@ -306,6 +326,6 @@ pub fn run() {
          */
         .run(tauri::generate_context!())
         .expect(
-            "error while running Pixel Slime Pomodoro",
+            "error while running slimy.doro",
         );
 }

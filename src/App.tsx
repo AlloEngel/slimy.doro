@@ -16,10 +16,21 @@ import { TitleBarControls } from "@/components/TitleBarControls";
 import { TodoList } from "@/components/TodoList";
 import { SettingsPanel } from "@/components/SettingsPanel";
 
+// Native window width used by the Tauri window.
 const NATIVE_WIDTH = 231;
+
+// Native window height when the full-height layout is required.
 const NATIVE_HEIGHT_WITH_TODO = 382;
+
+// Native window height when the compact layout is required.
 const NATIVE_HEIGHT_WITHOUT_TODO = 230;
 
+/**
+ * Main application component.
+ *
+ * Loads persisted application data, synchronizes native window state,
+ * manages the Pomodoro timer, and renders the main application interface.
+ */
 export default function App() {
     // Indicates whether persisted application data has finished loading.
     const hydrated = useAppStore((s) => s.hydrated);
@@ -30,7 +41,7 @@ export default function App() {
     // Reads the current application settings from the global store.
     const settings = useAppStore((s) => s.settings);
 
-    // Controls whether the settings panel is currently visible.
+    // Controls whether the Settings panel is currently visible.
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     /*
@@ -38,7 +49,7 @@ export default function App() {
      *
      * The Always on Top setting is passed to the hook for API
      * compatibility, but its native synchronization is handled
-     * separately below.
+     * explicitly by the effect below.
      */
     const { pinned, togglePin } = useClickThrough(
         settings.alwaysOnTop,
@@ -58,41 +69,6 @@ export default function App() {
     }, [hydrate]);
 
     /*
-     * Synchronizes native window effects after application settings
-     * have been hydrated.
-     *
-     * The background effect is applied first and Always on Top is
-     * applied afterward so the final native window state explicitly
-     * matches the user's persisted preference.
-     */
-    useEffect(() => {
-        if (!hydrated) return;
-
-        const synchronizeWindowState = async () => {
-            /*
-             * Apply the native background effect first.
-             */
-            await setBackgroundEffect(
-                settings.blurBackground,
-            );
-
-            /*
-             * Apply Always on Top last so it remains the final
-             * native z-order state of the window.
-             */
-            await setAlwaysOnTop(
-                settings.alwaysOnTop,
-            );
-        };
-
-        void synchronizeWindowState();
-    }, [
-        hydrated,
-        settings.blurBackground,
-        settings.alwaysOnTop,
-    ]);
-
-    /*
      * Determines whether the application should currently use
      * the full-height layout.
      *
@@ -104,37 +80,73 @@ export default function App() {
         settingsOpen || settings.showTodo;
 
     /*
-     * Resizes the native window according to the currently visible
-     * application state.
+     * Synchronizes all native window state after hydration.
      *
-     * While the Settings panel is open, the window intentionally
-     * keeps the full to-do-list height. Once Settings is closed,
-     * the height follows the Show to-do list setting again.
+     * The operations are intentionally performed in sequence:
      *
-     * These dimensions are logical pixels, which keeps the application
-     * consistent across monitors using different DPI scaling.
+     * 1. Set the native width.
+     * 2. Set the native height.
+     * 3. Apply the native background effect.
+     * 4. Apply Always on Top LAST.
      *
-     * The slime visibility setting intentionally does not affect
-     * the native window height. The available layout space is instead
-     * redistributed by the React flex layout below.
+     * Applying Always on Top last is important because native
+     * window size changes can affect the underlying window state
+     * on some platforms. Reapplying it after resizing guarantees
+     * that the final native state matches the persisted preference.
      */
     useEffect(() => {
         if (!hydrated) return;
 
-        const height = useFullHeightLayout
-            ? NATIVE_HEIGHT_WITH_TODO
-            : NATIVE_HEIGHT_WITHOUT_TODO;
+        const synchronizeWindowState = async () => {
+            /*
+             * Determine the native height from the currently
+             * visible application layout.
+             */
+            const height = useFullHeightLayout
+                ? NATIVE_HEIGHT_WITH_TODO
+                : NATIVE_HEIGHT_WITHOUT_TODO;
 
-        void setWindowWidth(NATIVE_WIDTH);
-        void setWindowHeight(height);
+            /*
+             * Apply the native logical window dimensions.
+             *
+             * These values are logical pixels so the window remains
+             * consistent across monitors using different DPI scales.
+             */
+            await setWindowWidth(NATIVE_WIDTH);
+            await setWindowHeight(height);
+
+            /*
+             * Apply the native background effect according to
+             * the persisted application preference.
+             */
+            await setBackgroundEffect(
+                settings.blurBackground,
+            );
+
+            /*
+             * Always on Top is intentionally applied LAST.
+             *
+             * This ensures that the final native window state
+             * explicitly matches the user's persisted preference,
+             * even after the window has been resized or otherwise
+             * updated during startup.
+             */
+            await setAlwaysOnTop(
+                settings.alwaysOnTop,
+            );
+        };
+
+        void synchronizeWindowState();
     }, [
         hydrated,
         useFullHeightLayout,
+        settings.blurBackground,
+        settings.alwaysOnTop,
     ]);
 
     /*
-     * The application starts with a transparent WebView while persisted
-     * settings are being loaded.
+     * The application starts with a transparent WebView while
+     * persisted settings are being loaded.
      */
     if (!hydrated) {
         return (
@@ -217,12 +229,11 @@ export default function App() {
                         <div
                             /*
                              * When the Todo list is hidden, the main timer
-                             * area already uses the available window height.
+                             * area uses the available window height.
                              *
-                             * The same flexible centering is also used when
-                             * the slime is hidden, allowing the TimerDisplay
-                             * to occupy the space left by the sprite instead
-                             * of leaving an empty gap.
+                             * The same flexible centering is used when the
+                             * slime is hidden, allowing the TimerDisplay
+                             * to occupy the space left by the sprite.
                              */
                             className={`flex min-h-0 flex-col items-center gap-1 ${
                                 !settings.showTodo ||
