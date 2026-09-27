@@ -1,32 +1,41 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/v2/crates/tauri-config-schema/schema.json",
+
   "productName": "slimy.doro",
   "version": "1.0.0",
   "identifier": "com.cozyware.pixelslimepomodoro",
+
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
+
   "app": {
     "windows": [
       {
         "label": "main",
         "title": "slimy.doro",
+
         "width": 231,
         "height": 382,
+
         "minWidth": 231,
         "minHeight": 230,
+
         "maxWidth": 231,
         "maxHeight": 382,
+
         "resizable": false,
         "maximizable": false,
         "minimizable": true,
         "closable": true,
+
         "decorations": false,
         "transparent": true,
         "shadow": false,
+
         "alwaysOnTop": false,
         "skipTaskbar": false,
         "center": false,
@@ -34,20 +43,50 @@
         "dragDropEnabled": false
       }
     ],
+
     "security": {
       "csp": null
     }
-
   },
+
   "bundle": {
     "active": true,
+
     "targets": "all",
+
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+
+    "publisher": "Allo Engel",
+    "copyright": "Copyright © 2026 Allo Engel",
+    "category": "Productivity",
+
+    "shortDescription": "A compact desktop Pomodoro companion.",
+
+    "longDescription": "slimy.doro is a compact desktop Pomodoro companion with a pixel-art slime, task management, customizable timer settings, and desktop productivity features.",
+
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+
+      "nsis": {
+        "installMode": "currentUser",
+
+        "languages": [
+          "English"
+        ],
+
+        "displayLanguageSelector": false,
+
+        "compression": "lzma"
+      }
+    }
   }
 }

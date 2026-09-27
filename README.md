@@ -1,65 +1,183 @@
-# Slimy.doro 🟦
+# slimy.doro 🟦
 
-A tiny desktop companion for people who can't stare at a bare countdown timer for 25 minutes straight. Slimy.doro is a frameless, transparent Pomodoro overlay with a pixel-art slime that reacts to what you're doing — it walks while you focus, dozes off on breaks, and does a little jump when you finish a task. Built with Tauri v2 + React + TypeScript because I wanted something native, lightweight, and not another Electron memory hog (skill issue, shame on me).
+A tiny desktop companion for people who don't want to stare at a bare countdown timer for 25 minutes straight.
 
-Open source, MIT licensed, PRs welcome.
+**slimy.doro** is a frameless, transparent Pomodoro desktop companion with a pixel-art slime that reacts to your workflow. It walks while you focus, dozes during breaks, and reacts when sessions or tasks are completed.
+
+Built with **Tauri v2 + React + TypeScript** for a native-feeling, lightweight desktop experience rather than another resource-heavy Electron app.
+
+Open source and MIT licensed. Contributions and pull requests are welcome!
+
+---
 
 ## Why
 
 Every Pomodoro app I tried was either too plain or too bloated. I wanted a widget I could pin in a corner, forget about, and glance at — something that felt more like a companion buddy than a productivity tool.
+
+The app combines:
+- Pomodoro sessions & compact task list
+- Reactive pixel-art slime animations
+- Pin & click-through mode
+- Always-on-top window setting
+- Window snapping & native desktop dragging
+- Opacity control & native background blur
+- Desktop notifications & chiptune sound effects
+- System tray menu & emergency unpin shortcut
+
+---
+
+## Features
+
+### Pomodoro Timer
+- Focus sessions, short breaks, and long breaks
+- Configurable durations and cycle tracking
+- Desktop notifications & optional chiptune audio feedback
+- Timer state automatically drives the slime's animations
+
+### Pixel-art Slime
+Visual companion that reacts dynamically to your workflow:
+- **Idle**: Timer stopped or paused
+- **Walking**: Active focus session
+- **Sleeping**: Break time
+- **Jumping**: Task completed or session finished
+- **Death**: Session canceled or reset
+
+*Note: The slime can be toggled off in Settings without altering the window dimensions.*
+
+### To-do List
+A compact task manager tailored for small overlay windows:
+- Quick creation, inline editing, and task completion
+- Drag-and-drop reordering + move up/down actions
+- Favorites & persistent local storage
+
+### Window Behavior & Pin Mode
+Designed to feel like a native desktop widget:
+- Frameless transparent surface with fixed compact dimensions
+- **Pin Mode**: Makes the window click-through so it stays visible over other apps without blocking interaction.
+- **Emergency Unpin Shortcut**:
+    - **Windows / Linux**: `Ctrl + Shift + U`
+    - **macOS**: `Cmd + Shift + U`
+- **Always on Top**: Functions independently from Pin Mode.
+
+### Visual Effects & System Tray
+- **Transparency**: Adjust surface opacity via Settings.
+- **Native Background Blur**: Uses OS-level window effects (not CSS `backdrop-filter`) for translucent readability. *(Opacity control is disabled when blur is enabled).*
+- **System Tray**: Built via Tauri's native `TrayIconBuilder` with options for Show/Hide, Toggle Pin Mode, and Quit.
+
+---
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/) 18+
 - [Rust](https://www.rust-lang.org/tools/install) (stable) + your platform's Tauri build tools ([prerequisites here](https://v2.tauri.app/start/prerequisites/))
 
-## Getting started
+---
 
-```bash
-npm install
+## Getting Started
 
-# generates real .icns/.ico icons from the placeholder — do this once before packaging a release
-npx tauri icon src-tauri/icons/icon.png
+1. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
 
-npm run tauri dev
-```
+2. Generate platform-specific app icons:
+   ```bash
+   npx tauri icon src-tauri/icons/icon.png
+   ```
 
-Build a release bundle:
+3. Start in development mode:
+   ```bash
+   npm run tauri dev
+   ```
 
+---
+
+## Production Builds
+
+Build the app for your current platform:
 ```bash
 npm run tauri build
 ```
 
-## How it's put together
-src-tauri/ Rust backend
+### Windows NSIS Installer
+To build the `.exe` installer specifically:
+```bash
+npx tauri build --bundles nsis
+```
+Output location: `src-tauri/target/release/bundle/nsis/`
+
+---
+
+## Project Structure
+
+```text
+src-tauri/
+├── src/
+│   ├── commands/
+│   │   ├── window.rs
+│   │   └── storage.rs
+│   ├── lib.rs
+│   └── main.rs
+├── capabilities/
+├── icons/
+├── Cargo.toml
+└── tauri.conf.json
+
 src/
-lib.rs app builder — plugins, tray icon, command registry
-main.rs entry point
-commands/
-window.rs pin/click-through, always-on-top, snap-to-corner, drag
-storage.rs atomic JSON read/write under $APP_DATA
-capabilities/ window permission grants
-tauri.conf.json transparent/frameless window config
+├── components/
+│   ├── SlimeStage
+│   ├── TimerDisplay
+│   ├── TitleBarControls
+│   ├── TodoList
+│   └── SettingsPanel
+├── hooks/
+│   ├── sprite animation
+│   ├── Pomodoro ticker
+│   ├── window drag
+│   └── click-through synchronization
+├── store/
+│   └── useAppStore.ts
+├── lib/
+│   ├── Tauri command wrappers
+│   ├── theme helpers
+│   ├── sprite metadata
+│   └── chiptune sound synthesis
+└── assets/
+    └── sprites/
 
-src/ React frontend
-components/ SlimeStage, TimerDisplay, TitleBarControls,
-TodoList, SettingsPanel
-hooks/ sprite animation loop, pomodoro ticker, drag,
-click-through sync
-store/useAppStore.ts settings, tasks, timer state machine (zustand)
-lib/ tauri command wrappers, chiptune SFX synth,
-sprite sheet metadata, theme helpers
-assets/sprites/ slime_blue_*-Sheet.png (32x32 frames each)
+themes/
+└── JSON theme files
+```
 
-themes/ drop-in JSON theme files
+### Key Modules
+- **Rust Backend (`src-tauri/`)**: Controls native window behavior (`window.rs`), atomic JSON storage (`storage.rs`), global shortcuts, tray icons, and system capabilities.
+- **React Frontend (`src/`)**: Interface components, Zustand store (`useAppStore.ts`), sprite canvas renderers, and custom hooks.
+
+---
+
+## Layout & Dimensions
+
+Fixed compact widget dimensions maintain visual layout stability:
+- **Width**: `231 px`
+- **Height (with To-do)**: `382 px`
+- **Height (without To-do)**: `230 px`
+
+Uses logical dimensions to ensure rendering consistency across Windows DPI scaling configurations.
+
+---
 
 ## Persistence
 
-Settings and tasks live in `$APP_DATA/config.json` and `$APP_DATA/tasks.json`, written through a small Rust command pair (`read_json_file` / `write_json_file`) that does a temp-file-then-rename so a crash mid-write can't corrupt anything. `$APP_DATA` resolves per OS — e.g. `~/Library/Application Support/com.cozyware.pixelslimepomodoro` on macOS, `%APPDATA%\com.cozyware.pixelslimepomodoro` on Windows.
+All settings, tasks, and preferences are saved locally to JSON files via Rust using an atomic temporary-file-then-rename writing strategy.
+
+- **macOS**: `~/Library/Application Support/com.cozyware.pixelslimepomodoro`
+- **Windows**: `%APPDATA%\com.cozyware.pixelslimepomodoro`
+
+---
 
 ## Theming
 
-Themes are just JSON — drop a new file in `themes/` shaped like `themes/cozy-default.json`:
+Themes are stored as JSON files and parsed into CSS custom properties via `src/lib/theme.ts`:
 
 ```json
 {
@@ -76,40 +194,35 @@ Themes are just JSON — drop a new file in `themes/` shaped like `themes/cozy-d
 }
 ```
 
-`src/lib/theme.ts` turns a theme into CSS custom properties on the document root. If you want a theme switcher in the settings panel, that's on the roadmap — for now it's a manual swap.
+---
 
-## The slime's state machine
+## Slime State Machine
 
-| State   | Sheet  | Frames | Trigger                                  |
-|---------|--------|--------|--------------------------------------------|
-| `idle`  | idle   | 10     | timer paused / stopped                     |
-| `walk`  | walk   | 7      | focus session running                      |
-| `sleep` | idle*  | 10     | break session running (idle @ 70% speed)   |
-| `jump`  | jump   | 12     | task completed or timer finished           |
-| `death` | death  | 5      | timer canceled / reset                     |
+Animations are rendered on a `<canvas>` element using $32 \times 32$ px sprite sheets driven by a `requestAnimationFrame` loop.
 
-Frames render on a `<canvas>` with `image-rendering: pixelated`, driven by a `requestAnimationFrame` loop in `useSpriteAnimation`. One-shot states (`jump`, `death`) play once and hand control back to idle/walk/sleep automatically.
+| State | Sheet | Frames | Trigger |
+| :--- | :--- | :--- | :--- |
+| **idle** | `idle` | 10 | Timer paused or stopped |
+| **walk** | `walk` | 7 | Focus session active |
+| **sleep** | `idle` | 10 | Break session active |
+| **jump** | `jump` | 12 | Task completed / session finished |
+| **death** | `death` | 5 | Timer canceled or reset |
 
-## Window behavior
+---
 
-- **Pin mode** (top-left icon) — click-through so it sits over whatever you're working in. Since a pinned window can't receive the click to unpin itself, use the tray menu's "Toggle Pin Mode" if you get stuck.
-- **Snap positions** — corner/center snapping from Settings → Window position.
-- **Emergency unpin shortcut (IMPORTANT)** — Ctrl+Shift+U (Cmd+Shift+U on macOS).
+## Contributing
 
-## Contributing 
+Pull requests and community ideas are welcome! Key areas for improvement:
+- **Pin Mode**: Flexible click-through behaviors & shortcuts
+- **Accessibility**: High contrast, screen-reader support, reduced-motion options
+- **UX & Companions**: Task list refinements & alternative sprite characters
 
-Issues and PRs are welcome! If you're adding a new animation state, check `lib/sprites.ts` first — frame size and sheet layout are defined there.
-
-Here are a few areas where ideas, experiments, and contributions are especially welcome:
-
-* **Pinned window:** ideas for keeping the Pin button interactive while the rest of the pinned window remains click-through. The Emergency Unpin shortcut is currently the only reliable solution.
-* **Accessibility:** suggestions for improving readability, especially around font sizes, contrast, and keyboard accessibility.
-* **To-Do UX:** ideas for making task creation, editing, ordering, and everyday use smoother.
-* **Window resizing:** new approaches for customizable window sizes and scaling.
-* **Companions:** ideas for modularizing the sprite and animation system so new companions can be added more easily.
-
-For larger changes, opening an issue first is encouraged. Keep PRs focused and avoid unrelated refactors.
+---
 
 ## License
 
-MIT
+MIT License
+
+Copyright © 2026 Allo Engel
+
+See the [MIT License](LICENSE) for the full license text.
