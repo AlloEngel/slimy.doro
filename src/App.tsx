@@ -192,7 +192,9 @@ export default function App() {
         "0 18px 40px rgba(0, 0, 0, 0.45)";
 
     return (
-        <div className={appScaleClass}>
+        <div
+            className={`${appScaleClass} overflow-hidden rounded-cozy`}
+        >
             <div
                 className={`relative h-full w-full overflow-hidden rounded-cozy contrast-${contrastMode}`}
                 style={{
