@@ -164,10 +164,9 @@ export default function App() {
 
     /*
      * Resolves the currently selected theme and converts it into CSS
-     * custom properties. These are applied on the outermost element so
-     * every descendant (including components that reference var(--accent),
-     * var(--on-accent), etc. directly) picks up the change immediately,
-     * without needing to know about the theme system itself.
+     * custom properties, applied on the outermost element so every
+     * descendant that references var(--accent), var(--on-accent), etc.
+     * picks up the change immediately.
      */
     const theme = getThemeById(settings.themeId);
     const themeVars = themeToCssVars(theme) as CSSProperties;
@@ -201,13 +200,21 @@ export default function App() {
     const glassShadow =
         "0 18px 40px rgba(0, 0, 0, 0.45)";
 
+    /*
+     * Enables the glassmorphism button treatment (see index.css) only
+     * while native Background Blur is active. This keeps the WebView's
+     * own button styling visually consistent with the blurred native
+     * window it now sits on top of, without affecting any behavior.
+     */
+    const glassClass = settings.blurBackground ? "glass-mode" : "";
+
     return (
         <div
             className={`${appScaleClass} overflow-hidden rounded-cozy`}
             style={themeVars}
         >
             <div
-                className={`relative h-full w-full overflow-hidden rounded-cozy contrast-${contrastMode}`}
+                className={`relative h-full w-full overflow-hidden rounded-cozy contrast-${contrastMode} ${glassClass}`}
                 style={{
                     /*
                      * The surface stays translucent so the native

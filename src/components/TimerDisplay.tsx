@@ -49,20 +49,24 @@ export function TimerDisplay() {
         </div>
 
         <div className="mt-1 flex items-center gap-2 px-3">
+          {/* .btn-surface provides the neutral surface, including its
+              glassmorphism variant when Background Blur is enabled. */}
           <button
               type="button"
               onClick={resetSession}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/5 text-current transition hover:bg-black/10 active:scale-95"
+              className="btn-surface flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-current transition active:scale-95"
               aria-label="Cancel and reset session"
               title="Cancel session"
           >
             <RotateCcw size={20} strokeWidth={2.25} />
           </button>
 
+          {/* .btn-primary provides the accent CTA surface, including its
+              glassmorphism variant when Background Blur is enabled. */}
           <button
               type="button"
               onClick={startPause}
-              className="flex h-[3.1rem] w-44 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--accent)] font-mono text-base font-bold uppercase tracking-wide text-[var(--on-accent)] shadow-[0_6px_16px_rgba(51,59,77,0.28)] transition hover:brightness-110 active:scale-[0.98]"
+              className="btn-primary flex h-[3.1rem] w-44 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full font-mono text-base font-bold uppercase tracking-wide transition active:scale-[0.98]"
               aria-label={isRunning ? "Pause session" : "Start session"}
           >
             {isRunning ? (
@@ -77,7 +81,7 @@ export function TimerDisplay() {
           <button
               type="button"
               onClick={skipSession}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/5 text-current transition hover:bg-black/10 active:scale-95"
+              className="btn-surface flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-current transition active:scale-95"
               aria-label="Skip to next session"
               title="Skip session"
           >

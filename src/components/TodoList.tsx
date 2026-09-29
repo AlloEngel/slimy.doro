@@ -219,11 +219,14 @@ export function TodoList() {
                     }`}
                 />
 
+                {/* .btn-primary-compact provides the accent surface for
+                    this small control, including its glassmorphism
+                    variant when Background Blur is enabled. */}
                 <button
                     type="submit"
                     disabled={atLimit || !draft.trim()}
                     aria-label="Add task"
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[var(--accent)] text-[var(--on-accent)] transition hover:brightness-105 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
+                    className="btn-primary-compact flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
                 >
                     <Plus size={13} strokeWidth={3} />
                 </button>
@@ -332,7 +335,9 @@ export function TodoList() {
                                 )}
                             </div>
 
-                            {/* Manual task ordering controls. */}
+                            {/* Manual task ordering controls. .btn-ghost keeps these
+                                controls background-free at rest, with only a hover
+                                surface (including its glassmorphism variant). */}
                             <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
                                 {/* Move task up. */}
                                 <button
@@ -341,7 +346,7 @@ export function TodoList() {
                                     disabled={isFirst}
                                     aria-label={`Move "${task.title}" up`}
                                     title="Move task up"
-                                    className="flex h-5 w-5 items-center justify-center rounded transition hover:bg-black/10 disabled:cursor-not-allowed disabled:opacity-20"
+                                    className="btn-ghost flex h-5 w-5 items-center justify-center rounded transition disabled:cursor-not-allowed disabled:opacity-20"
                                 >
                                     <ChevronUp size={16} strokeWidth={2.25} />
                                 </button>
@@ -353,7 +358,7 @@ export function TodoList() {
                                     disabled={isLast}
                                     aria-label={`Move "${task.title}" down`}
                                     title="Move task down"
-                                    className="flex h-5 w-5 items-center justify-center rounded transition hover:bg-black/10 disabled:cursor-not-allowed disabled:opacity-20"
+                                    className="btn-ghost flex h-5 w-5 items-center justify-center rounded transition disabled:cursor-not-allowed disabled:opacity-20"
                                 >
                                     <ChevronDown size={16} strokeWidth={2.25} />
                                 </button>

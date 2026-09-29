@@ -16,6 +16,10 @@ const SNAP_POSITIONS: { id: SnapPosition; label: string }[] = [
 /**
  * Reusable toggle control used for boolean settings.
  *
+ * Uses the shared .toggle-track / .toggle-track-on / .toggle-thumb
+ * classes (see index.css), which switch to a glassmorphism surface
+ * whenever Background Blur is enabled.
+ *
  * Displays the current state and calls onChange when the user
  * toggles the setting.
  */
@@ -39,13 +43,11 @@ function Toggle({
                 aria-label={label}
                 onClick={onChange}
                 className={`relative h-6 w-11 shrink-0 rounded-full transition ${
-                    checked
-                        ? "bg-[var(--accent)]"
-                        : "bg-white/15 hover:bg-white/20"
+                    checked ? "toggle-track toggle-track-on" : "toggle-track"
                 }`}
             >
                 <span
-                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                    className={`toggle-thumb absolute top-0.5 h-5 w-5 rounded-full transition ${
                         checked ? "left-[22px]" : "left-0.5"
                     }`}
                 />
@@ -194,12 +196,15 @@ export function SettingsPanel({ onClose }: Props) {
                     Settings
                 </h2>
 
+                {/* .btn-surface provides the neutral control surface,
+                    including its glassmorphism variant when Background
+                    Blur is enabled. */}
                 <button
                     type="button"
                     onClick={onClose}
                     aria-label="Close settings"
                     title="Close settings"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[var(--text)] transition hover:bg-white/15 active:scale-90"
+                    className="btn-surface flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--text)] transition active:scale-90"
                 >
                     <X size={18} />
                 </button>
@@ -320,7 +325,9 @@ export function SettingsPanel({ onClose }: Props) {
                         </div>
                     </section>
 
-                    {/* Window Position */}
+                    {/* Window Position. .btn-surface provides the neutral
+                        surface, including its glassmorphism variant when
+                        Background Blur is enabled. */}
                     <section>
                         <SectionHeading>
                             Window position
@@ -334,7 +341,7 @@ export function SettingsPanel({ onClose }: Props) {
                                     onClick={() =>
                                         void snapWindow(pos.id)
                                     }
-                                    className="rounded-lg bg-white/5 px-1 py-2.5 text-[12px] font-medium text-[var(--text-deep)] transition hover:bg-white/10 active:scale-[0.98]"
+                                    className="btn-surface rounded-lg px-1 py-2.5 text-[12px] font-medium text-[var(--text-deep)] transition active:scale-[0.98]"
                                 >
                                     {pos.label}
                                 </button>
@@ -447,7 +454,9 @@ export function SettingsPanel({ onClose }: Props) {
                         </div>
                     </section>
 
-                    {/* Cycle Reset */}
+                    {/* Cycle Reset. .btn-surface provides the neutral
+                        surface, including its glassmorphism variant when
+                        Background Blur is enabled. */}
                     <section className="rounded-lg bg-white/[0.03] p-3">
                         <div className="mb-2 flex items-center justify-between gap-3">
                             <div>
@@ -468,7 +477,7 @@ export function SettingsPanel({ onClose }: Props) {
                                 onClick={resetCycles}
                                 aria-label="Reset Pomodoro cycles"
                                 title="Reset Pomodoro cycles"
-                                className="flex shrink-0 items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-2 text-[13px] font-semibold text-[var(--text-deep)] transition hover:bg-white/15 active:scale-[0.98]"
+                                className="btn-surface flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-2 text-[13px] font-semibold text-[var(--text-deep)] transition active:scale-[0.98]"
                             >
                                 <RotateCcw size={15} />
                                 Reset cycles

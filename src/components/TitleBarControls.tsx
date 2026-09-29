@@ -16,6 +16,10 @@ interface Props {
 /**
  * Reusable circular control button used by the title bar.
  *
+ * Uses the shared .btn-surface / .btn-surface-active classes (see
+ * index.css) so its look automatically switches to a glassmorphism
+ * surface whenever Background Blur is enabled, without any logic here.
+ *
  * The data-no-drag attribute prevents the window drag handler from
  * treating the button as a draggable surface.
  */
@@ -39,8 +43,8 @@ function ControlButton({
             data-no-drag
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition active:scale-90 ${
                 active
-                    ? "bg-[var(--accent)] text-[var(--on-accent)]"
-                    : "bg-white/10 text-current hover:bg-white/15"
+                    ? "btn-surface-active"
+                    : "btn-surface text-current"
             }`}
         >
             {children}

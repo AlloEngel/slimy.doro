@@ -115,3 +115,201 @@ input:focus-visible,
           inset 0 2px 0 0 color-mix(in srgb, var(--accent) 45%, black),
           0 0 6px 0 color-mix(in srgb, var(--accent) 40%, transparent);
 }
+
+/* =====================================================================
+   Button surfaces
+   =====================================================================
+   Shared surface classes used by every functional control (icon
+   buttons, snap-position buttons, cycle reset, toggle switches, the
+   primary Start/Pause CTA, etc). Colors are derived from the active
+   theme's own CSS variables (--text-deep, --accent, --surface...)
+   rather than hardcoded black/white overlays, so a single class keeps
+   correct contrast on every theme — light or dark — and at every
+   opacity level.
+
+   Each class has a plain baseline look (used when Background Blur is
+   off) and a ".glass-mode" override (used when it's on) — see the
+   dedicated section below.
+   ===================================================================== */
+
+/* Neutral secondary surface: icon buttons, snap-position buttons,
+   the settings/minimize/close controls, cycle reset. */
+.btn-surface {
+  background-color: color-mix(in srgb, var(--text-deep) 8%, transparent);
+  border: 1px solid transparent;
+}
+
+.btn-surface:hover {
+  background-color: color-mix(in srgb, var(--text-deep) 14%, transparent);
+}
+
+/* Selected/active variant (e.g. Pin Mode enabled). Independent of
+   glass mode so the selected state always reads clearly. */
+.btn-surface-active {
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Minimal control with no resting background, only a hover surface.
+   Used by the compact up/down task-reorder chevrons. */
+.btn-ghost {
+  background-color: transparent;
+}
+
+.btn-ghost:hover {
+  background-color: color-mix(in srgb, var(--text-deep) 12%, transparent);
+}
+
+/* Primary call-to-action surface (Start/Pause). */
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border: 1px solid transparent;
+  box-shadow: 0 6px 16px rgba(51, 59, 77, 0.28);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+/* Compact primary surface for small controls (add-task button). */
+.btn-primary-compact {
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border: 1px solid transparent;
+}
+
+.btn-primary-compact:hover {
+  filter: brightness(1.05);
+}
+
+/* Toggle switch track/thumb. */
+.toggle-track {
+  background-color: color-mix(in srgb, var(--text-deep) 16%, transparent);
+  border: 1px solid transparent;
+}
+
+.toggle-track:hover {
+  background-color: color-mix(in srgb, var(--text-deep) 22%, transparent);
+}
+
+.toggle-track-on {
+  background-color: var(--accent);
+}
+
+.toggle-track-on:hover {
+  background-color: var(--accent);
+}
+
+.toggle-thumb {
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* =====================================================================
+   Glassmorphism variants — active only while Background Blur is on.
+   =====================================================================
+   App.tsx adds the ".glass-mode" class to the app root whenever
+   settings.blurBackground is true. While active, buttons swap their
+   flat translucent surface for a frosted-glass treatment: a soft
+   gradient fill, backdrop blur, a faint border, and a thin top
+   highlight to suggest a lit glass edge. Everything is built from
+   color-mix() over the active theme's own variables so the effect
+   stays cohesive with whichever theme and opacity level is active,
+   instead of a generic fixed-color glass panel. The effect is kept
+   subtle (moderate blur radius, low-opacity fills) so controls still
+   read primarily as functional buttons rather than decoration.
+   ===================================================================== */
+
+.glass-mode .btn-surface {
+  background: linear-gradient(
+          160deg,
+          color-mix(in srgb, var(--surface-soft) 55%, transparent),
+          color-mix(in srgb, var(--surface) 30%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--text-deep) 16%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+          inset 0 1px 0 0 color-mix(in srgb, white 20%, transparent),
+          0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+.glass-mode .btn-surface:hover {
+  background: linear-gradient(
+          160deg,
+          color-mix(in srgb, var(--surface-soft) 72%, transparent),
+          color-mix(in srgb, var(--surface) 45%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.glass-mode .btn-surface-active {
+  background: color-mix(in srgb, var(--accent) 85%, transparent);
+  border-color: color-mix(in srgb, white 35%, var(--accent));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+          inset 0 1px 0 0 color-mix(in srgb, white 35%, transparent),
+          0 2px 8px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.glass-mode .btn-ghost:hover {
+  background: color-mix(in srgb, var(--surface-soft) 55%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.glass-mode .btn-primary {
+  background: linear-gradient(
+          160deg,
+          color-mix(in srgb, var(--accent) 95%, white 5%),
+          color-mix(in srgb, var(--accent) 78%, transparent)
+  );
+  border-color: color-mix(in srgb, white 30%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+          inset 0 1px 0 0 color-mix(in srgb, white 35%, transparent),
+          0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.glass-mode .btn-primary-compact {
+  background: linear-gradient(
+          160deg,
+          color-mix(in srgb, var(--accent) 95%, white 5%),
+          color-mix(in srgb, var(--accent) 75%, transparent)
+  );
+  border-color: color-mix(in srgb, white 30%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 30%, transparent);
+}
+
+.glass-mode .toggle-track {
+  background: color-mix(in srgb, var(--surface-soft) 45%, transparent);
+  border-color: color-mix(in srgb, var(--text-deep) 16%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.glass-mode .toggle-track:hover {
+  background: color-mix(in srgb, var(--surface-soft) 62%, transparent);
+}
+
+.glass-mode .toggle-track-on {
+  background: color-mix(in srgb, var(--accent) 85%, transparent);
+  border-color: color-mix(in srgb, white 30%, transparent);
+  box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 30%, transparent);
+}
+
+.glass-mode .toggle-track-on:hover {
+  background: color-mix(in srgb, var(--accent) 85%, transparent);
+}
+
+.glass-mode .toggle-thumb {
+  background-color: color-mix(in srgb, white 92%, var(--accent) 8%);
+  box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 0 rgba(255, 255, 255, 0.55);
+}
