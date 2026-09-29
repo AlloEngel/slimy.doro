@@ -84,6 +84,9 @@ interface AppState {
         partial: Partial<AppSettings["timer"]>,
     ) => void;
 
+    // Selects the active visual theme by its registry ID.
+    setTheme: (themeId: string) => void;
+
     // Creates a new task at the beginning of the task list.
     addTask: (title: string) => void;
 
@@ -193,8 +196,10 @@ export const useAppStore = create<AppState>((set) => ({
         /*
          * Merge persisted settings over the defaults.
          *
-         * This also provides the new showSlime property to existing
-         * configuration files that were created before this setting existed.
+         * This also provides new properties (e.g. showSlime, themeId)
+         * to existing configuration files that were created before
+         * those settings existed. A settings file with no themeId at
+         * all falls straight through to DEFAULT_SETTINGS.themeId ("slate").
          */
         const settings = {
             ...DEFAULT_SETTINGS,
@@ -356,6 +361,25 @@ export const useAppStore = create<AppState>((set) => ({
                 settings,
                 secondsLeft,
             };
+        }),
+
+    /**
+     * Selects the active theme by ID and persists the preference.
+     *
+     * Only the theme ID is stored — the store never imports the theme
+     * registry itself, keeping theme content and app state independent.
+     * Timer state and tasks are intentionally untouched.
+     */
+    setTheme: (themeId) =>
+        set((state) => {
+            const settings = {
+                ...state.settings,
+                themeId,
+            };
+
+            persistSettings(settings);
+
+            return { settings };
         }),
 
     /**

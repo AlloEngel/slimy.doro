@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { RotateCcw, X } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { snapWindow } from "@/lib/tauri";
+import { getThemes } from "@/lib/theme";
 import type { SnapPosition } from "@/types";
 
 const SNAP_POSITIONS: { id: SnapPosition; label: string }[] = [
@@ -170,6 +171,12 @@ export function SettingsPanel({ onClose }: Props) {
         (s) => s.resetCycles,
     );
 
+    // Selects the active visual theme.
+    const setTheme = useAppStore((s) => s.setTheme);
+
+    // Every theme available for selection, sourced from the central registry.
+    const themes = getThemes();
+
     return (
         <div
             /*
@@ -209,6 +216,44 @@ export function SettingsPanel({ onClose }: Props) {
                             onChange={toggleAlwaysOnTop}
                             label="Always on top"
                         />
+                    </section>
+
+                    {/* Appearance */}
+                    <section>
+                        <SectionHeading>
+                            Appearance
+                        </SectionHeading>
+
+                        <label className="flex items-center justify-between gap-4 py-1 text-[15px] font-medium text-[var(--text-deep)]">
+                            <span>Theme</span>
+
+                            <select
+                                value={settings.themeId}
+                                onChange={(e) =>
+                                    setTheme(e.target.value)
+                                }
+                                aria-label="Application theme"
+                                className="max-w-[140px] rounded-md bg-white/10 px-2 py-1.5 text-[14px] font-semibold text-[var(--text-deep)] focus:bg-white/15 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                            >
+                                {themes.map((theme) => (
+                                    <option
+                                        key={theme.id}
+                                        value={theme.id}
+                                        /*
+                                         * Native <option> popups are rendered
+                                         * by the OS/browser, not by our CSS
+                                         * variables, so a fixed dark-on-light
+                                         * pairing keeps every theme's option
+                                         * list readable regardless of which
+                                         * theme happens to be active.
+                                         */
+                                        className="bg-white text-black"
+                                    >
+                                        {theme.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
                     </section>
 
                     {/* Transparency */}

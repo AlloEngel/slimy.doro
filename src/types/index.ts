@@ -66,6 +66,12 @@ export interface Theme {
     accentDim: string;
     text: string;
     textDeep: string;
+    // Foreground color used for text/icons placed directly on top of
+    // the accent color (e.g. the primary CTA button, the Pin Mode
+    // shortcut banner). Kept separate per-theme because a single
+    // hardcoded foreground (white, dark, etc.) does not have enough
+    // contrast against every accent color across all themes.
+    onAccent: string;
   };
 }
 
@@ -90,5 +96,11 @@ export const DEFAULT_SETTINGS: AppSettings = {
   notificationsEnabled: true,
   alwaysOnTop: false,
   timer: DEFAULT_TIMER_SETTINGS,
-  themeId: "cozy-default",
+
+  // Dusk Slate is the application's default theme. Existing persisted
+  // settings created before the theme system existed do not contain a
+  // themeId at all; the store's hydrate() merges DEFAULT_SETTINGS first
+  // and the persisted object second, so any settings file missing this
+  // key automatically falls back to "slate" without extra handling.
+  themeId: "slate",
 };

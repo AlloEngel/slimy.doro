@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { usePomodoroTicker } from "@/hooks/usePomodoroTicker";
 import { useClickThrough } from "@/hooks/useClickThrough";
 import { useWindowDrag } from "@/hooks/useWindowDrag";
-import { resolveContrastMode, opacityToAlpha } from "@/lib/theme";
+import { resolveContrastMode, opacityToAlpha, getThemeById, themeToCssVars } from "@/lib/theme";
 import {
     setAlwaysOnTop,
     setBackgroundEffect,
@@ -163,6 +163,16 @@ export default function App() {
     const alpha = opacityToAlpha(settings.opacity);
 
     /*
+     * Resolves the currently selected theme and converts it into CSS
+     * custom properties. These are applied on the outermost element so
+     * every descendant (including components that reference var(--accent),
+     * var(--on-accent), etc. directly) picks up the change immediately,
+     * without needing to know about the theme system itself.
+     */
+    const theme = getThemeById(settings.themeId);
+    const themeVars = themeToCssVars(theme) as CSSProperties;
+
+    /*
      * Selects the correct scaled layout.
      *
      * Settings uses the full-height layout even when the to-do list
@@ -194,6 +204,7 @@ export default function App() {
     return (
         <div
             className={`${appScaleClass} overflow-hidden rounded-cozy`}
+            style={themeVars}
         >
             <div
                 className={`relative h-full w-full overflow-hidden rounded-cozy contrast-${contrastMode}`}
