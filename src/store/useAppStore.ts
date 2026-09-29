@@ -67,6 +67,9 @@ interface AppState {
     // Shows or hides the slime sprite animation.
     toggleShowSlime: () => void;
 
+    // Shows or hides the Timer module.
+    toggleShowTimer: () => void;
+
     // Shows or hides the Todo list.
     toggleShowTodo: () => void;
 
@@ -196,10 +199,11 @@ export const useAppStore = create<AppState>((set) => ({
         /*
          * Merge persisted settings over the defaults.
          *
-         * This also provides new properties (e.g. showSlime, themeId)
-         * to existing configuration files that were created before
-         * those settings existed. A settings file with no themeId at
-         * all falls straight through to DEFAULT_SETTINGS.themeId ("slate").
+         * This also provides new properties (e.g. showSlime, showTimer,
+         * themeId) to existing configuration files that were created
+         * before those settings existed. A settings file with no
+         * showTimer at all falls straight through to
+         * DEFAULT_SETTINGS.showTimer (true), preserving prior behavior.
          */
         const settings = {
             ...DEFAULT_SETTINGS,
@@ -260,6 +264,24 @@ export const useAppStore = create<AppState>((set) => ({
             const settings = {
                 ...state.settings,
                 showSlime: !state.settings.showSlime,
+            };
+
+            persistSettings(settings);
+
+            return { settings };
+        }),
+
+    /**
+     * Toggles visibility of the Timer module and saves the preference.
+     *
+     * Like showSlime, this only affects UI rendering — native window
+     * height continues to be driven by Todo visibility.
+     */
+    toggleShowTimer: () =>
+        set((state) => {
+            const settings = {
+                ...state.settings,
+                showTimer: !state.settings.showTimer,
             };
 
             persistSettings(settings);

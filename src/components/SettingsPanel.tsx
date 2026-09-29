@@ -59,8 +59,11 @@ function Toggle({
 /**
  * Reusable numeric input used for timer settings.
  *
- * Clamps the entered value between the configured minimum
- * and maximum before passing it to the parent component.
+ * Uses the shared .input-surface class (see index.css) so the field
+ * reads as a clearly editable control against every theme, instead of
+ * blending into the settings background as plain text — the field
+ * remains clamped between the configured minimum and maximum before
+ * the value is passed to the parent component.
  */
 function NumberField({
                          label,
@@ -93,7 +96,7 @@ function NumberField({
                         );
                     }
                 }}
-                className="w-16 rounded-md bg-white/10 px-2 py-1.5 text-right font-mono text-[14px] font-semibold text-[var(--text-deep)] focus:bg-white/15 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                className="input-surface w-16 rounded-md px-2 py-1.5 text-right font-mono text-[14px] font-semibold focus:outline-none"
             />
         </label>
     );
@@ -121,7 +124,7 @@ interface Props {
 
 /**
  * Settings panel for configuring the application's appearance,
- * window behavior, general features, and Pomodoro timer.
+ * window behavior, module visibility, and Pomodoro timer.
  */
 export function SettingsPanel({ onClose }: Props) {
     // Reads the current application settings from the Zustand store.
@@ -141,6 +144,11 @@ export function SettingsPanel({ onClose }: Props) {
     // Toggles visibility of the slime sprite animation.
     const toggleShowSlime = useAppStore(
         (s) => s.toggleShowSlime,
+    );
+
+    // Toggles visibility of the Timer module.
+    const toggleShowTimer = useAppStore(
+        (s) => s.toggleShowTimer,
     );
 
     // Toggles visibility of the to-do list.
@@ -238,7 +246,7 @@ export function SettingsPanel({ onClose }: Props) {
                                     setTheme(e.target.value)
                                 }
                                 aria-label="Application theme"
-                                className="max-w-[140px] rounded-md bg-white/10 px-2 py-1.5 text-[14px] font-semibold text-[var(--text-deep)] focus:bg-white/15 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                                className="input-surface max-w-[140px] rounded-md px-2 py-1.5 text-[14px] font-semibold focus:outline-none"
                             >
                                 {themes.map((theme) => (
                                     <option
@@ -259,6 +267,32 @@ export function SettingsPanel({ onClose }: Props) {
                                 ))}
                             </select>
                         </label>
+                    </section>
+
+                    {/* Modules — each of the three main application
+                        elements can be shown or hidden independently. */}
+                    <section className="divide-y divide-white/10 rounded-lg bg-white/[0.03] px-3 py-1">
+                        <SectionHeading>
+                            Modules
+                        </SectionHeading>
+
+                        <Toggle
+                            checked={settings.showSlime}
+                            onChange={toggleShowSlime}
+                            label="Show slime animation"
+                        />
+
+                        <Toggle
+                            checked={settings.showTimer}
+                            onChange={toggleShowTimer}
+                            label="Show timer"
+                        />
+
+                        <Toggle
+                            checked={settings.showTodo}
+                            onChange={toggleShowTodo}
+                            label="Show to-do list"
+                        />
                     </section>
 
                     {/* Transparency */}
@@ -349,20 +383,8 @@ export function SettingsPanel({ onClose }: Props) {
                         </div>
                     </section>
 
-                    {/* General Toggles */}
+                    {/* General */}
                     <section className="divide-y divide-white/10 rounded-lg bg-white/[0.03] px-3 py-1">
-                        <Toggle
-                            checked={settings.showSlime}
-                            onChange={toggleShowSlime}
-                            label="Show slime animation"
-                        />
-
-                        <Toggle
-                            checked={settings.showTodo}
-                            onChange={toggleShowTodo}
-                            label="Show to-do list"
-                        />
-
                         <Toggle
                             checked={settings.soundEnabled}
                             onChange={toggleSound}

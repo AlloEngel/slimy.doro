@@ -360,3 +360,54 @@ input:focus-visible,
 .todo-icon-muted:hover {
   color: var(--accent);
 }
+
+/* =====================================================================
+   Form inputs
+   =====================================================================
+   Shared surface for every actual text/number/select input in the
+   application (add-task field, inline task rename, timer duration
+   fields, theme selector).
+
+   The input surface is derived from the active theme instead of using
+   a fixed light or dark fill. A subtle mix between --surface and
+   --surface-soft keeps inputs visually integrated with dark themes
+   while still giving light themes enough separation to read as
+   editable controls.
+
+   The border provides additional separation when the two theme
+   surfaces are visually close, and the focus state uses the theme's
+   accent color.
+   ===================================================================== */
+
+.input-surface {
+  background-color: color-mix(
+          in srgb,
+          var(--surface-soft) 45%,
+          var(--surface)
+  );
+  color: var(--text-deep);
+  border: 1px solid color-mix(
+          in srgb,
+          var(--text-deep) 22%,
+          transparent
+  );
+}
+
+.input-surface::placeholder {
+  color: color-mix(
+          in srgb,
+          var(--text-deep) 55%,
+          transparent
+  );
+}
+
+.input-surface:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.input-surface:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

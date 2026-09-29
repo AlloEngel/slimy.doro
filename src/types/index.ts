@@ -37,6 +37,9 @@ export interface AppSettings {
   // Controls whether the slime sprite animation is visible.
   showSlime: boolean;
 
+  // Controls whether the Timer module (countdown + controls) is visible.
+  showTimer: boolean;
+
   // Controls whether the to-do list is visible.
   showTodo: boolean;
 
@@ -90,6 +93,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
   // The slime animation remains enabled by default to preserve
   // the application's existing behavior for new and old users.
   showSlime: true,
+
+  // Timer module is enabled by default, preserving prior behavior for
+  // existing users whose persisted settings predate this option.
+  showTimer: true,
 
   showTodo: true,
   soundEnabled: true,

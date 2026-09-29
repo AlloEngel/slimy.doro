@@ -197,7 +197,10 @@ export function TodoList() {
                 </span>
             </div>
 
-            {/* Input used to create a new task. */}
+            {/* Input used to create a new task. Uses .input-surface (see
+                index.css) so its background clearly derives from the
+                active theme instead of a fixed dark overlay that looks
+                out of place on light themes. */}
             <form
                 onSubmit={submit}
                 className="flex items-center gap-1.5"
@@ -212,7 +215,7 @@ export function TodoList() {
                             : "Type a task to add..."
                     }
                     disabled={atLimit}
-                    className={`w-full min-w-0 rounded-md bg-black/20 px-2.5 py-1.5 text-[15px] text-current placeholder:text-current/50 focus:bg-black/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`input-surface w-full min-w-0 rounded-md px-2.5 py-1.5 text-[15px] focus:outline-none disabled:cursor-not-allowed ${
                         draft.length === TASK_TITLE_MAX_LENGTH
                             ? "ring-1 ring-[var(--accent)]"
                             : ""
@@ -301,7 +304,10 @@ export function TodoList() {
                                     }`}
                                 />
 
-                                {/* Task title or inline rename field. */}
+                                {/* Task title or inline rename field. The
+                                    rename field uses .input-surface so it
+                                    reads as an editable control against
+                                    every theme. */}
                                 {editingId === task.id ? (
                                     <input
                                         autoFocus
@@ -318,7 +324,7 @@ export function TodoList() {
                                                 setEditingId(null);
                                             }
                                         }}
-                                        className={`min-w-0 flex-1 rounded bg-black/5 px-1 text-[15px] text-current focus:outline-none ${
+                                        className={`input-surface min-w-0 flex-1 rounded px-1 text-[15px] focus:outline-none ${
                                             editValue.length === TASK_TITLE_MAX_LENGTH
                                                 ? "ring-1 ring-[var(--accent)]"
                                                 : ""

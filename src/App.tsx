@@ -80,6 +80,10 @@ export default function App() {
      * Settings always uses the full-height layout so changing
      * Show to-do list while the Settings panel is open does not
      * resize the visible application.
+     *
+     * This intentionally depends only on showTodo (not showSlime or
+     * showTimer): the Todo list is the module that actually needs the
+     * extra vertical space, so it alone determines the native height.
      */
     const useFullHeightLayout =
         settingsOpen || settings.showTodo;
@@ -200,6 +204,21 @@ export default function App() {
         ? "glass-mode"
         : "";
 
+    /*
+     * The "top block" groups the two modules that share the upper part
+     * of the composition (Slime, Timer). It is only rendered when at
+     * least one of them is enabled — this avoids leaving an empty flex
+     * child (and its gap) when both are disabled, letting Todo (or an
+     * empty state) naturally take over the freed space.
+     */
+    const topBlockVisible = settings.showSlime || settings.showTimer;
+
+    /*
+     * A gap between the top block and Todo is only meaningful when both
+     * are actually rendered; otherwise it would add unwanted empty space.
+     */
+    const showBothGroups = topBlockVisible && settings.showTodo;
+
     return (
         <div
             className={`${appScaleClass} overflow-hidden rounded-cozy`}
@@ -246,39 +265,44 @@ export default function App() {
                          * safety area below the absolute title bar controls.
                          */
                         className={`flex h-full w-full flex-col px-4 pb-6 pt-12 ${
-                            settings.showTodo
+                            showBothGroups
                                 ? "gap-5"
                                 : ""
                         }`}
                     >
-                        <div
-                            /*
-                             * When Todo is hidden, the main block expands
-                             * into the available content area and centers
-                             * the timer/slime composition.
-                             *
-                             * When Todo is visible, the block also expands
-                             * into the available space, but its content is
-                             * bottom-aligned. This keeps the timer visually
-                             * connected to the Todo list instead of placing
-                             * the two elements at opposite ends.
-                             *
-                             * Because the parent has explicit top padding,
-                             * bottom alignment can never place the timer
-                             * inside the title bar area.
-                             */
-                            className={`flex min-h-0 flex-1 flex-col items-center gap-1 ${
-                                settings.showTodo
-                                    ? "justify-end"
-                                    : "justify-center"
-                            }`}
-                        >
-                            {settings.showSlime && (
-                                <SlimeStage />
-                            )}
+                        {topBlockVisible && (
+                            <div
+                                /*
+                                 * When Todo is hidden, the top block expands
+                                 * into the available content area and
+                                 * centers the slime/timer composition.
+                                 *
+                                 * When Todo is visible, the top block also
+                                 * expands into the available space, but its
+                                 * content is bottom-aligned. This keeps
+                                 * whichever of Slime/Timer is enabled
+                                 * visually connected to the Todo list
+                                 * instead of the two ends of the window.
+                                 *
+                                 * Because the parent has explicit top
+                                 * padding, bottom alignment can never place
+                                 * this block inside the title bar area.
+                                 */
+                                className={`flex min-h-0 flex-1 flex-col items-center gap-1 ${
+                                    settings.showTodo
+                                        ? "justify-end"
+                                        : "justify-center"
+                                }`}
+                            >
+                                {settings.showSlime && (
+                                    <SlimeStage />
+                                )}
 
-                            <TimerDisplay />
-                        </div>
+                                {settings.showTimer && (
+                                    <TimerDisplay />
+                                )}
+                            </div>
+                        )}
 
                         {settings.showTodo && (
                             <TodoList />
