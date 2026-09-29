@@ -3,7 +3,12 @@ import { useAppStore } from "@/store/useAppStore";
 import { usePomodoroTicker } from "@/hooks/usePomodoroTicker";
 import { useClickThrough } from "@/hooks/useClickThrough";
 import { useWindowDrag } from "@/hooks/useWindowDrag";
-import { resolveContrastMode, opacityToAlpha, getThemeById, themeToCssVars } from "@/lib/theme";
+import {
+    resolveContrastMode,
+    opacityToAlpha,
+    getThemeById,
+    themeToCssVars,
+} from "@/lib/theme";
 import {
     setAlwaysOnTop,
     setBackgroundEffect,
@@ -88,11 +93,6 @@ export default function App() {
      * 2. Set the native height.
      * 3. Apply the native background effect.
      * 4. Apply Always on Top LAST.
-     *
-     * Applying Always on Top last is important because native
-     * window size changes can affect the underlying window state
-     * on some platforms. Reapplying it after resizing guarantees
-     * that the final native state matches the persisted preference.
      */
     useEffect(() => {
         if (!hydrated) return;
@@ -124,12 +124,8 @@ export default function App() {
             );
 
             /*
-             * Always on Top is intentionally applied LAST.
-             *
-             * This ensures that the final native window state
-             * explicitly matches the user's persisted preference,
-             * even after the window has been resized or otherwise
-             * updated during startup.
+             * Always on Top is intentionally applied LAST so the
+             * final native state matches the persisted preference.
              */
             await setAlwaysOnTop(
                 settings.alwaysOnTop,
@@ -163,10 +159,8 @@ export default function App() {
     const alpha = opacityToAlpha(settings.opacity);
 
     /*
-     * Resolves the currently selected theme and converts it into CSS
-     * custom properties, applied on the outermost element so every
-     * descendant that references var(--accent), var(--on-accent), etc.
-     * picks up the change immediately.
+     * Resolves the currently selected theme and converts it into
+     * CSS custom properties for the entire application.
      */
     const theme = getThemeById(settings.themeId);
     const themeVars = themeToCssVars(theme) as CSSProperties;
@@ -174,8 +168,8 @@ export default function App() {
     /*
      * Selects the correct scaled layout.
      *
-     * Settings uses the full-height layout even when the to-do list
-     * has been disabled, preventing the Settings panel from shrinking.
+     * Settings uses the full-height layout even when the Todo list
+     * has been disabled so the Settings panel does not shrink.
      */
     const appScaleClass = useFullHeightLayout
         ? "app-scale"
@@ -183,9 +177,7 @@ export default function App() {
 
     /*
      * When native blur is enabled, the WebView surface must remain
-     * sufficiently translucent for the native material to be visible.
-     *
-     * The operating system performs the actual background blur.
+     * sufficiently translucent for the native material to remain visible.
      */
     const surfaceAlpha = settings.blurBackground
         ? Math.min(alpha * 100, 28)
@@ -194,19 +186,19 @@ export default function App() {
     /*
      * Provides a subtle shadow around the application.
      *
-     * No CSS border or inset highlight is applied here because the
-     * native background effect already provides the window surface.
+     * No CSS border or inset highlight is applied because the native
+     * background effect already provides the window surface.
      */
     const glassShadow =
         "0 18px 40px rgba(0, 0, 0, 0.45)";
 
     /*
-     * Enables the glassmorphism button treatment (see index.css) only
-     * while native Background Blur is active. This keeps the WebView's
-     * own button styling visually consistent with the blurred native
-     * window it now sits on top of, without affecting any behavior.
+     * Enables the glassmorphism button treatment only while
+     * native Background Blur is active.
      */
-    const glassClass = settings.blurBackground ? "glass-mode" : "";
+    const glassClass = settings.blurBackground
+        ? "glass-mode"
+        : "";
 
     return (
         <div
@@ -218,7 +210,7 @@ export default function App() {
                 style={{
                     /*
                      * The surface stays translucent so the native
-                     * background effect can remain visible.
+                     * background effect remains visible.
                      */
                     backgroundColor:
                         `color-mix(in srgb, var(--surface) ${surfaceAlpha}%, transparent)`,
@@ -245,21 +237,40 @@ export default function App() {
                 />
 
                 {!settingsOpen && (
-                    <div className="flex h-full w-full flex-col gap-8 px-4 pb-2 pt-8">
+                    <div
+                        /*
+                         * The content area starts below the title bar and
+                         * uses the remaining window height for composition.
+                         *
+                         * The larger top padding creates a reliable visual
+                         * safety area below the absolute title bar controls.
+                         */
+                        className={`flex h-full w-full flex-col px-4 pb-6 pt-12 ${
+                            settings.showTodo
+                                ? "gap-5"
+                                : ""
+                        }`}
+                    >
                         <div
                             /*
-                             * When the Todo list is hidden, the main timer
-                             * area uses the available window height.
+                             * When Todo is hidden, the main block expands
+                             * into the available content area and centers
+                             * the timer/slime composition.
                              *
-                             * The same flexible centering is used when the
-                             * slime is hidden, allowing the TimerDisplay
-                             * to occupy the space left by the sprite.
+                             * When Todo is visible, the block also expands
+                             * into the available space, but its content is
+                             * bottom-aligned. This keeps the timer visually
+                             * connected to the Todo list instead of placing
+                             * the two elements at opposite ends.
+                             *
+                             * Because the parent has explicit top padding,
+                             * bottom alignment can never place the timer
+                             * inside the title bar area.
                              */
-                            className={`flex min-h-0 flex-col items-center gap-1 ${
-                                !settings.showTodo ||
-                                !settings.showSlime
-                                    ? "flex-1 justify-center"
-                                    : ""
+                            className={`flex min-h-0 flex-1 flex-col items-center gap-1 ${
+                                settings.showTodo
+                                    ? "justify-end"
+                                    : "justify-center"
                             }`}
                         >
                             {settings.showSlime && (

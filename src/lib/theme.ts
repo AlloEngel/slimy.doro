@@ -212,3 +212,72 @@ export function themeToCssVars(theme: Theme): Record<string, string> {
     "--on-accent": theme.colors.onAccent,
   };
 }
+
+/**
+ * Per-theme CSS filter recipe used to recolor the (originally blue)
+ * slime sprite sheets at render time.
+ *
+ * The sprites are static PNGs — there is no per-theme artwork and no
+ * pixel-level palette swap here. Instead, `hue-rotate` shifts every
+ * saturated (colored) pixel's hue while leaving grayscale pixels
+ * (blacks, whites, outline shading) untouched, since hue has no effect
+ * on zero-saturation colors. This preserves the sprite's linework and
+ * tonal shading while retargeting its dominant hue to match each
+ * theme's accent color. `hueRotate` values below were derived from the
+ * actual hue of each theme's accent color relative to the sprite's
+ * original blue (~193° hue, matching the Dusk Slate accent #73BED3).
+ * `saturate`/`brightness` are hand-tuned per theme to better match its
+ * overall mood (e.g. pastel for Cozy Cream, muted for Gruvbox/Solarized).
+ */
+interface SlimeFilterConfig {
+  hueRotate: number;
+  saturate: number;
+  brightness: number;
+}
+
+const SLIME_FILTERS: Record<string, SlimeFilterConfig> = {
+  // Matches the sprite's native blue — no shift needed.
+  slate: { hueRotate: 0, saturate: 1, brightness: 1 },
+
+  // Rotates blue toward orange/peach, softened for a pastel feel.
+  cream: { hueRotate: 179, saturate: 0.85, brightness: 1.08 },
+
+  // Rotates blue toward Dracula's purple accent.
+  dracula: { hueRotate: 72, saturate: 1, brightness: 1 },
+
+  // Rotates blue toward Gruvbox's warm orange, slightly muted.
+  gruvbox: { hueRotate: 194, saturate: 0.9, brightness: 0.95 },
+
+  // Exception: 100% Black keeps the slime's original blue palette.
+  black: { hueRotate: 0, saturate: 1, brightness: 1 },
+
+  // Nord's accent hue is close to the sprite's native blue; desaturate
+  // and brighten slightly for a frosty, icy look instead of a hue shift.
+  nord: { hueRotate: 0, saturate: 0.85, brightness: 1.05 },
+
+  // Rotates blue toward Catppuccin's lavender accent.
+  catppuccin: { hueRotate: 74, saturate: 1, brightness: 1 },
+
+  // Rotates blue toward Tokyo Night's indigo-blue accent.
+  tokyonight: { hueRotate: 28, saturate: 1, brightness: 1 },
+
+  // Rotates blue toward Solarized's teal accent, slightly muted.
+  solarized: { hueRotate: 343, saturate: 0.9, brightness: 0.95 },
+
+  // Rotates blue toward One Dark's brighter blue accent.
+  onedark: { hueRotate: 14, saturate: 1, brightness: 1 },
+
+  // Rotates blue toward Monokai's lime-green accent.
+  monokai: { hueRotate: 247, saturate: 1, brightness: 1 },
+};
+
+/**
+ * Returns the CSS `filter` value used to recolor the slime sprite for
+ * the given theme. Falls back to the default theme's filter (a no-op)
+ * for unknown theme IDs.
+ */
+export function getSlimeFilter(themeId: string): string {
+  const config = SLIME_FILTERS[themeId] ?? SLIME_FILTERS[DEFAULT_THEME_ID];
+
+  return `hue-rotate(${config.hueRotate}deg) saturate(${config.saturate}) brightness(${config.brightness})`;
+}

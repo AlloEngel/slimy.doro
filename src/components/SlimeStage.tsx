@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { resolveAnimation, SPRITE_ANIMATIONS } from "@/lib/sprites";
 import { useSpriteAnimation } from "@/hooks/useSpriteAnimation";
+import { getSlimeFilter } from "@/lib/theme";
 import type { SlimeState } from "@/types";
 
 const DISPLAY_SCALE = 3.5; // 32px source frames -> ~112px on screen
@@ -34,6 +35,9 @@ export function SlimeStage() {
   const lastEvent = useAppStore((s) => s.lastEvent);
   const clearLastEvent = useAppStore((s) => s.clearLastEvent);
 
+  // Drives the per-theme recoloring of the (otherwise static) sprite sheets.
+  const themeId = useAppStore((s) => s.settings.themeId);
+
   const [overlay, setOverlay] = useState<
       Extract<SlimeState, "jump" | "death"> | null
   >(null);
@@ -59,6 +63,18 @@ export function SlimeStage() {
   const config = useMemo(
       () => resolveAnimation(activeState),
       [activeState],
+  );
+
+  /*
+   * The sprite sheets are single-hue blue PNGs. Rather than shipping
+   * per-theme artwork, the active theme's palette is applied as a CSS
+   * filter on the canvas: hue-rotate shifts the sprite's blue toward
+   * the theme's accent hue while leaving grayscale outline/shading
+   * pixels untouched, preserving the character's readability.
+   */
+  const slimeFilter = useMemo(
+      () => getSlimeFilter(themeId),
+      [themeId],
   );
 
   const handleComplete = () => {
@@ -135,7 +151,10 @@ export function SlimeStage() {
         {particles.map((p) => (
             <span
                 key={p.id}
-                className="pointer-events-none absolute select-none font-display text-[10px] text-slime-500 animate-float-up"
+                // Uses the active theme's accent color directly so the
+                // sleep indicator stays visually paired with the
+                // recolored slime instead of a fixed hardcoded blue.
+                className="pointer-events-none absolute select-none font-display text-[10px] text-[var(--accent)] animate-float-up"
                 style={{
                   top: 2,
                   left: `calc(50% + ${p.offset}px)`,
@@ -155,6 +174,8 @@ export function SlimeStage() {
               width: size,
               height: size,
               marginTop: 8,
+              // Recolors the sprite sheet to match the active theme.
+              filter: slimeFilter,
             }}
             role="img"
             aria-label={`Slime companion, currently ${activeState}`}

@@ -313,3 +313,50 @@ input:focus-visible,
           0 1px 3px rgba(0, 0, 0, 0.4),
           inset 0 1px 0 0 rgba(255, 255, 255, 0.55);
 }
+
+/* =====================================================================
+   Todo list controls
+   =====================================================================
+   The checkbox, reorder, favorite, and delete controls are bound
+   directly to the active theme's own tokens (--text-deep, --accent)
+   instead of the ambient `currentColor`. `currentColor` here would
+   otherwise resolve through `.contrast-light`, which forces literal
+   white at low window opacity for outside-window legibility — on a
+   light theme (e.g. Cozy Cream) that makes these controls blend into
+   the light surface and become effectively invisible. Binding to the
+   theme tokens directly keeps them legible against that theme's own
+   surface at every opacity level.
+   ===================================================================== */
+
+.todo-checkbox {
+  border-color: color-mix(in srgb, var(--text-deep) 45%, transparent);
+}
+
+.todo-checkbox:hover {
+  border-color: var(--accent);
+}
+
+.todo-checkbox-checked {
+  border-color: var(--accent);
+  background-color: var(--accent);
+}
+
+/* Reorder chevrons: icon color derived from the theme; background
+   hover handled separately by .btn-ghost. */
+.todo-icon-btn {
+  color: color-mix(in srgb, var(--text-deep) 55%, transparent);
+}
+
+.todo-icon-btn:hover {
+  color: var(--text-deep);
+}
+
+/* Favorite (unselected) and delete icons: muted theme text at rest,
+   accent on hover. */
+.todo-icon-muted {
+  color: color-mix(in srgb, var(--text-deep) 45%, transparent);
+}
+
+.todo-icon-muted:hover {
+  color: var(--accent);
+}

@@ -284,7 +284,10 @@ export function TodoList() {
                         >
                             {/* Main task content with left padding aligned to the input text. */}
                             <div className="flex min-w-0 flex-1 items-start gap-1.5 pl-1.5">
-                                {/* Completion checkbox. */}
+                                {/* Completion checkbox. Uses theme-bound
+                                    .todo-checkbox(-checked) classes instead
+                                    of currentColor so it stays visible
+                                    against every theme's surface. */}
                                 <button
                                     type="button"
                                     onClick={() => toggleTaskDone(task.id)}
@@ -293,8 +296,8 @@ export function TodoList() {
                                     }`}
                                     className={`h-3.5 w-3.5 shrink-0 rounded-[4px] border transition ${
                                         task.done
-                                            ? "border-[var(--accent)] bg-[var(--accent)]"
-                                            : "border-current/40 hover:border-[var(--accent)]"
+                                            ? "todo-checkbox-checked"
+                                            : "todo-checkbox"
                                     }`}
                                 />
 
@@ -335,9 +338,10 @@ export function TodoList() {
                                 )}
                             </div>
 
-                            {/* Manual task ordering controls. .btn-ghost keeps these
-                                controls background-free at rest, with only a hover
-                                surface (including its glassmorphism variant). */}
+                            {/* Manual task ordering controls. .btn-ghost
+                                provides the hover background (including
+                                its glassmorphism variant); .todo-icon-btn
+                                provides theme-bound icon color. */}
                             <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
                                 {/* Move task up. */}
                                 <button
@@ -346,7 +350,7 @@ export function TodoList() {
                                     disabled={isFirst}
                                     aria-label={`Move "${task.title}" up`}
                                     title="Move task up"
-                                    className="btn-ghost flex h-5 w-5 items-center justify-center rounded transition disabled:cursor-not-allowed disabled:opacity-20"
+                                    className="btn-ghost todo-icon-btn flex h-5 w-5 items-center justify-center rounded transition disabled:cursor-not-allowed disabled:opacity-20"
                                 >
                                     <ChevronUp size={16} strokeWidth={2.25} />
                                 </button>
@@ -358,13 +362,16 @@ export function TodoList() {
                                     disabled={isLast}
                                     aria-label={`Move "${task.title}" down`}
                                     title="Move task down"
-                                    className="btn-ghost flex h-5 w-5 items-center justify-center rounded transition disabled:cursor-not-allowed disabled:opacity-20"
+                                    className="btn-ghost todo-icon-btn flex h-5 w-5 items-center justify-center rounded transition disabled:cursor-not-allowed disabled:opacity-20"
                                 >
                                     <ChevronDown size={16} strokeWidth={2.25} />
                                 </button>
                             </div>
 
-                            {/* Favorite toggle. */}
+                            {/* Favorite toggle. Unselected state uses
+                                .todo-icon-muted for theme-bound contrast;
+                                selected state already uses var(--accent)
+                                directly. */}
                             <button
                                 type="button"
                                 onClick={() => toggleTaskFavorite(task.id)}
@@ -381,7 +388,7 @@ export function TodoList() {
                                     className={
                                         task.favorite
                                             ? "fill-[var(--accent)] text-[var(--accent)]"
-                                            : "text-current/50"
+                                            : "todo-icon-muted"
                                     }
                                 />
                             </button>
@@ -391,13 +398,16 @@ export function TodoList() {
                              *
                              * Active tasks only reveal the delete button when
                              * the row is hovered or the button receives focus.
+                             *
+                             * .todo-icon-muted provides theme-bound resting
+                             * color and an accent hover state.
                              */}
                             <button
                                 type="button"
                                 onClick={() => deleteTask(task.id)}
                                 aria-label="Delete task"
                                 title="Delete task"
-                                className={`flex h-5 w-5 shrink-0 items-center justify-center text-current/50 transition hover:text-[var(--accent)] ${
+                                className={`todo-icon-muted flex h-5 w-5 shrink-0 items-center justify-center transition ${
                                     task.done
                                         ? "opacity-100"
                                         : "opacity-0 group-hover:opacity-100 focus:opacity-100"
