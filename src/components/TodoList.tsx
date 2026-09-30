@@ -297,7 +297,7 @@ export function TodoList() {
                                     aria-label={`Mark "${task.title}" ${
                                         task.done ? "not done" : "done"
                                     }`}
-                                    className={`h-3.5 w-3.5 shrink-0 rounded-[4px] border transition ${
+                                    className={`h-4 w-4 shrink-0 rounded-[4px] border transition ${
                                         task.done
                                             ? "todo-checkbox-checked"
                                             : "todo-checkbox"
