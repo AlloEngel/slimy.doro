@@ -1,9 +1,17 @@
 import { type ReactNode } from "react";
-import { RotateCcw, X } from "lucide-react";
+import {
+    ChevronDown,
+    ChevronUp,
+    RotateCcw,
+    X,
+} from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { snapWindow } from "@/lib/tauri";
 import { getThemes } from "@/lib/theme";
-import type { SnapPosition } from "@/types";
+import {
+    DEFAULT_TIMER_SETTINGS,
+    type SnapPosition,
+} from "@/types";
 
 const SNAP_POSITIONS: { id: SnapPosition; label: string }[] = [
     { id: "top-left", label: "Top left" },
@@ -43,7 +51,9 @@ function Toggle({
                 aria-label={label}
                 onClick={onChange}
                 className={`relative h-6 w-11 shrink-0 rounded-full transition ${
-                    checked ? "toggle-track toggle-track-on" : "toggle-track"
+                    checked
+                        ? "toggle-track toggle-track-on"
+                        : "toggle-track"
                 }`}
             >
                 <span
@@ -57,48 +67,112 @@ function Toggle({
 }
 
 /**
- * Reusable numeric input used for timer settings.
+ * Reusable numeric stepper used for timer settings.
  *
- * Uses the shared .input-surface class (see index.css) so the field
- * reads as a clearly editable control against every theme, instead of
- * blending into the settings background as plain text — the field
- * remains clamped between the configured minimum and maximum before
- * the value is passed to the parent component.
+ * Provides:
+ * - A directly editable numeric input.
+ * - Dedicated increment/decrement buttons outside the input.
+ * - A small reset button that restores the original timer value.
+ *
+ * The value is clamped between the configured minimum and maximum.
  */
 function NumberField({
                          label,
                          value,
                          onChange,
+                         defaultValue,
                          min = 1,
                          max = 120,
                      }: {
     label: string;
     value: number;
     onChange: (n: number) => void;
+    defaultValue: number;
     min?: number;
     max?: number;
 }) {
+    const increment = () => {
+        onChange(Math.min(max, value + 1));
+    };
+
+    const decrement = () => {
+        onChange(Math.max(min, value - 1));
+    };
+
+    const reset = () => {
+        onChange(defaultValue);
+    };
+
+    const isDefault = value === defaultValue;
+
     return (
-        <label className="flex items-center justify-between gap-4 py-2 text-[15px] font-medium text-[var(--text-deep)]">
-            <span>{label}</span>
+        <div className="flex items-center justify-between gap-4 py-2">
+            <span className="text-[15px] font-medium text-[var(--text-deep)]">
+                {label}
+            </span>
 
-            <input
-                type="number"
-                min={min}
-                max={max}
-                value={value}
-                onChange={(e) => {
-                    const n = Number(e.target.value);
+            <div className="flex shrink-0 items-center gap-1.5">
+                {/* Numeric value and dedicated step controls. */}
+                <div className="flex items-stretch">
+                    <input
+                        type="number"
+                        min={min}
+                        max={max}
+                        value={value}
+                        onChange={(e) => {
+                            const n = Number(e.target.value);
 
-                    if (!Number.isNaN(n)) {
-                        onChange(
-                            Math.min(max, Math.max(min, n)),
-                        );
-                    }
-                }}
-                className="input-surface w-16 rounded-md px-2 py-1.5 text-right font-mono text-[14px] font-semibold focus:outline-none"
-            />
-        </label>
+                            if (!Number.isNaN(n)) {
+                                onChange(
+                                    Math.min(
+                                        max,
+                                        Math.max(min, n),
+                                    ),
+                                );
+                            }
+                        }}
+                        aria-label={label}
+                        className="input-surface w-14 rounded-l-md rounded-r-none border-r-0 px-2 py-1.5 text-right font-mono text-[14px] font-semibold focus:outline-none"
+                    />
+
+                    <div className="flex w-6 flex-col">
+                        <button
+                            type="button"
+                            onClick={increment}
+                            disabled={value >= max}
+                            aria-label={`Increase ${label}`}
+                            title={`Increase ${label}`}
+                            className="btn-surface flex h-[17px] items-center justify-center rounded-tr-md border-l-0 text-[var(--text)] transition hover:text-[var(--text-deep)] disabled:pointer-events-none disabled:opacity-25"
+                        >
+                            <ChevronUp size={13} strokeWidth={2.5} />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={decrement}
+                            disabled={value <= min}
+                            aria-label={`Decrease ${label}`}
+                            title={`Decrease ${label}`}
+                            className="btn-surface flex h-[17px] items-center justify-center rounded-br-md border-l-0 text-[var(--text)] transition hover:text-[var(--text-deep)] disabled:pointer-events-none disabled:opacity-25"
+                        >
+                            <ChevronDown size={13} strokeWidth={2.5} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Reset is intentionally subtle when the value is already default. */}
+                <button
+                    type="button"
+                    onClick={reset}
+                    disabled={isDefault}
+                    aria-label={`Reset ${label}`}
+                    title={`Reset ${label} to default`}
+                    className="btn-ghost flex h-7 w-7 items-center justify-center rounded-md text-[var(--text)] transition hover:text-[var(--text-deep)] disabled:pointer-events-none disabled:opacity-20"
+                >
+                    <RotateCcw size={13} />
+                </button>
+            </div>
+        </div>
     );
 }
 
@@ -222,294 +296,327 @@ export function SettingsPanel({ onClose }: Props) {
             <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-1">
                 <div className="flex flex-col gap-4">
 
-                    {/* Window behavior */}
-                    <section className="rounded-lg bg-white/[0.03] px-3 py-1">
-                        <Toggle
-                            checked={settings.alwaysOnTop}
-                            onChange={toggleAlwaysOnTop}
-                            label="Always on top"
-                        />
-                    </section>
-
                     {/* Appearance */}
-                    <section>
+                    <section className="rounded-lg bg-white/[0.03] px-3 py-2">
                         <SectionHeading>
                             Appearance
                         </SectionHeading>
 
-                        <label className="flex items-center justify-between gap-4 py-1 text-[15px] font-medium text-[var(--text-deep)]">
-                            <span>Theme</span>
+                        <div className="divide-y divide-white/10">
+                            {/* Theme */}
+                            <label className="flex items-center justify-between gap-4 py-2.5 text-[15px] font-medium text-[var(--text-deep)]">
+                                <span>Theme</span>
 
-                            <select
-                                value={settings.themeId}
-                                onChange={(e) =>
-                                    setTheme(e.target.value)
-                                }
-                                aria-label="Application theme"
-                                className="input-surface max-w-[140px] rounded-md px-2 py-1.5 text-[14px] font-semibold focus:outline-none"
-                            >
-                                {themes.map((theme) => (
-                                    <option
-                                        key={theme.id}
-                                        value={theme.id}
-                                        /*
-                                         * Native <option> popups are rendered
-                                         * by the OS/browser, not by our CSS
-                                         * variables, so a fixed dark-on-light
-                                         * pairing keeps every theme's option
-                                         * list readable regardless of which
-                                         * theme happens to be active.
-                                         */
-                                        className="bg-white text-black"
+                                <select
+                                    value={settings.themeId}
+                                    onChange={(e) =>
+                                        setTheme(e.target.value)
+                                    }
+                                    aria-label="Application theme"
+                                    className="input-surface max-w-[140px] rounded-md px-2 py-1.5 text-[14px] font-semibold focus:outline-none"
+                                >
+                                    {themes.map((theme) => (
+                                        <option
+                                            key={theme.id}
+                                            value={theme.id}
+                                            /*
+                                             * Native <option> popups are rendered
+                                             * by the OS/browser, not by our CSS
+                                             * variables, so a fixed dark-on-light
+                                             * pairing keeps every theme's option
+                                             * list readable regardless of which
+                                             * theme happens to be active.
+                                             */
+                                            className="bg-white text-black"
+                                        >
+                                            {theme.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            {/* Window opacity */}
+                            <div className="py-2.5">
+                                <div className="flex items-center justify-between text-[15px]">
+                                    <span className="font-medium text-[var(--text-deep)]">
+                                        Window opacity
+                                    </span>
+
+                                    <span
+                                        className={`font-mono text-[15px] font-bold ${
+                                            settings.blurBackground
+                                                ? "text-[var(--text-deep)]/40"
+                                                : "text-[var(--text-deep)]"
+                                        }`}
                                     >
-                                        {theme.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
+                                        {settings.opacity}%
+                                    </span>
+                                </div>
+
+                                <input
+                                    type="range"
+                                    min={0}
+                                    max={100}
+                                    step={25}
+                                    value={settings.opacity}
+                                    onChange={(e) =>
+                                        setOpacity(
+                                            Number(e.target.value),
+                                        )
+                                    }
+                                    disabled={settings.blurBackground}
+                                    className="mt-2 w-full accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-30"
+                                    aria-label="Window opacity"
+                                    aria-disabled={
+                                        settings.blurBackground
+                                    }
+                                />
+
+                                {settings.opacity <= 50 && (
+                                    <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]/70">
+                                        Lower transparency may make the
+                                        interface harder to read.
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Background blur */}
+                            <div className="py-0.5">
+                                <Toggle
+                                    checked={settings.blurBackground}
+                                    onChange={
+                                        toggleBlurBackground
+                                    }
+                                    label="Background blur"
+                                />
+
+                                {settings.blurBackground && (
+                                    <p className="-mt-1 pb-2 text-[13px] leading-relaxed text-[var(--text)]/70">
+                                        Blur mode uses a translucent
+                                        window surface.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
                     </section>
 
-                    {/* Modules — each of the three main application
-                        elements can be shown or hidden independently. */}
-                    <section className="divide-y divide-white/10 rounded-lg bg-white/[0.03] px-3 py-1">
+                    {/* Modules */}
+                    <section className="rounded-lg bg-white/[0.03] px-3 py-2">
                         <SectionHeading>
                             Modules
                         </SectionHeading>
 
-                        <Toggle
-                            checked={settings.showSlime}
-                            onChange={toggleShowSlime}
-                            label="Show slime animation"
-                        />
-
-                        <Toggle
-                            checked={settings.showTimer}
-                            onChange={toggleShowTimer}
-                            label="Show timer"
-                        />
-
-                        <Toggle
-                            checked={settings.showTodo}
-                            onChange={toggleShowTodo}
-                            label="Show to-do list"
-                        />
-                    </section>
-
-                    {/* Transparency */}
-                    <section>
-                        <SectionHeading>
-                            Transparency
-                        </SectionHeading>
-
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between text-[15px]">
-                                <span className="font-medium text-[var(--text-deep)]">
-                                    Window opacity
-                                </span>
-
-                                <span
-                                    className={`font-mono text-[15px] font-bold ${
-                                        settings.blurBackground
-                                            ? "text-[var(--text-deep)]/40"
-                                            : "text-[var(--text-deep)]"
-                                    }`}
-                                >
-                                    {settings.opacity}%
-                                </span>
-                            </div>
-
-                            <input
-                                type="range"
-                                min={0}
-                                max={100}
-                                step={25}
-                                value={settings.opacity}
-                                onChange={(e) =>
-                                    setOpacity(
-                                        Number(e.target.value),
-                                    )
-                                }
-                                disabled={settings.blurBackground}
-                                className="w-full accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-30"
-                                aria-label="Window opacity"
-                                aria-disabled={settings.blurBackground}
-                            />
-
-                            {/* Warns the user when low transparency may reduce readability. */}
-                            {settings.opacity <= 50 && (
-                                <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]/70">
-                                    Lower transparency may make the
-                                    interface harder to read.
-                                </p>
-                            )}
-
-                            {/* Enables the native platform blur behind the window. */}
+                        <div className="divide-y divide-white/10">
                             <Toggle
-                                checked={settings.blurBackground}
-                                onChange={toggleBlurBackground}
-                                label="Background blur"
+                                checked={settings.showSlime}
+                                onChange={toggleShowSlime}
+                                label="Show slime animation"
                             />
 
-                            {/* Explains that Blur Mode uses a translucent window surface. */}
-                            {settings.blurBackground && (
-                                <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]/70">
-                                    Blur mode uses a translucent window surface.
-                                </p>
-                            )}
+                            <Toggle
+                                checked={settings.showTimer}
+                                onChange={toggleShowTimer}
+                                label="Show timer"
+                            />
+
+                            <Toggle
+                                checked={settings.showTodo}
+                                onChange={toggleShowTodo}
+                                label="Show to-do list"
+                            />
                         </div>
                     </section>
 
-                    {/* Window Position. .btn-surface provides the neutral
-                        surface, including its glassmorphism variant when
-                        Background Blur is enabled. */}
-                    <section>
+                    {/* Window */}
+                    <section className="rounded-lg bg-white/[0.03] px-3 py-2">
                         <SectionHeading>
-                            Window position
+                            Window
                         </SectionHeading>
 
-                        <div className="grid grid-cols-3 gap-1.5">
-                            {SNAP_POSITIONS.map((pos) => (
-                                <button
-                                    key={pos.id}
-                                    type="button"
-                                    onClick={() =>
-                                        void snapWindow(pos.id)
-                                    }
-                                    className="btn-surface rounded-lg px-1 py-2.5 text-[12px] font-medium text-[var(--text-deep)] transition active:scale-[0.98]"
-                                >
-                                    {pos.label}
-                                </button>
-                            ))}
+                        <div className="divide-y divide-white/10">
+                            {/* Always on top */}
+                            <Toggle
+                                checked={settings.alwaysOnTop}
+                                onChange={toggleAlwaysOnTop}
+                                label="Always on top"
+                            />
+
+                            {/* Window position */}
+                            <div className="py-2.5">
+                                <span className="mb-2 block text-[15px] font-medium text-[var(--text-deep)]">
+                                    Window position
+                                </span>
+
+                                <div className="grid grid-cols-3 gap-1.5">
+                                    {SNAP_POSITIONS.map((pos) => (
+                                        <button
+                                            key={pos.id}
+                                            type="button"
+                                            onClick={() =>
+                                                void snapWindow(
+                                                    pos.id,
+                                                )
+                                            }
+                                            className="btn-surface rounded-lg px-1 py-2.5 text-[12px] font-medium text-[var(--text-deep)] transition active:scale-[0.98]"
+                                        >
+                                            {pos.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </section>
 
                     {/* General */}
-                    <section className="divide-y divide-white/10 rounded-lg bg-white/[0.03] px-3 py-1">
-                        <Toggle
-                            checked={settings.soundEnabled}
-                            onChange={toggleSound}
-                            label="Chiptune sound effects"
-                        />
-
-                        <Toggle
-                            checked={settings.notificationsEnabled}
-                            onChange={toggleNotifications}
-                            label="Desktop notifications"
-                        />
-                    </section>
-
-                    {/* Timer Durations */}
-                    <section>
+                    <section className="rounded-lg bg-white/[0.03] px-3 py-2">
                         <SectionHeading>
-                            Timer durations
+                            General
                         </SectionHeading>
 
-                        <div className="space-y-0.5">
-                            <NumberField
-                                label="Focus"
-                                value={
-                                    settings.timer.focusMinutes
-                                }
-                                onChange={(n) =>
-                                    updateTimerSettings({
-                                        focusMinutes: n,
-                                    })
-                                }
+                        <div className="divide-y divide-white/10">
+                            <Toggle
+                                checked={settings.soundEnabled}
+                                onChange={toggleSound}
+                                label="Chiptune sound effects"
                             />
 
-                            <NumberField
-                                label="Short break"
-                                value={
-                                    settings.timer
-                                        .shortBreakMinutes
-                                }
-                                onChange={(n) =>
-                                    updateTimerSettings({
-                                        shortBreakMinutes: n,
-                                    })
-                                }
-                            />
-
-                            <NumberField
-                                label="Long break"
-                                value={
-                                    settings.timer
-                                        .longBreakMinutes
-                                }
-                                onChange={(n) =>
-                                    updateTimerSettings({
-                                        longBreakMinutes: n,
-                                    })
-                                }
-                            />
-
-                            <NumberField
-                                label="Focus cycles before long break"
-                                value={
-                                    settings.timer
-                                        .cyclesBeforeLongBreak
-                                }
-                                onChange={(n) =>
-                                    updateTimerSettings({
-                                        cyclesBeforeLongBreak: n,
-                                    })
-                                }
-                                min={1}
-                                max={12}
-                            />
-                        </div>
-
-                        <div className="mt-2 border-t border-white/10 pt-1">
                             <Toggle
                                 checked={
-                                    settings.timer.autoStartNext
+                                    settings.notificationsEnabled
                                 }
-                                onChange={() =>
-                                    updateTimerSettings({
-                                        autoStartNext:
-                                            !settings.timer
-                                                .autoStartNext,
-                                    })
-                                }
-                                label="Auto-start next session"
+                                onChange={toggleNotifications}
+                                label="Desktop notifications"
                             />
                         </div>
                     </section>
 
-                    {/* Cycle Reset. .btn-surface provides the neutral
-                        surface, including its glassmorphism variant when
-                        Background Blur is enabled. */}
-                    <section className="rounded-lg bg-white/[0.03] p-3">
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                            <div>
-                                <h3 className="text-[15px] font-semibold text-[var(--text-deep)]">
-                                    Pomodoro cycle
-                                </h3>
+                    {/* Timer */}
+                    <section className="rounded-lg bg-white/[0.03] px-3 py-2">
+                        <SectionHeading>
+                            Timer
+                        </SectionHeading>
 
-                                <p className="mt-0.5 text-[13px] leading-relaxed text-[var(--text)]/70">
-                                    Current cycle:{" "}
-                                    <span className="font-mono text-[14px] font-bold text-[var(--text-deep)]">
-                                        {cycle}
-                                    </span>
-                                </p>
+                        <div className="divide-y divide-white/10">
+                            {/* Timer durations */}
+                            <div className="py-1">
+                                <NumberField
+                                    label="Focus"
+                                    value={
+                                        settings.timer.focusMinutes
+                                    }
+                                    defaultValue={
+                                        DEFAULT_TIMER_SETTINGS.focusMinutes
+                                    }
+                                    onChange={(n) =>
+                                        updateTimerSettings({
+                                            focusMinutes: n,
+                                        })
+                                    }
+                                />
+
+                                <NumberField
+                                    label="Short break"
+                                    value={
+                                        settings.timer
+                                            .shortBreakMinutes
+                                    }
+                                    defaultValue={
+                                        DEFAULT_TIMER_SETTINGS.shortBreakMinutes
+                                    }
+                                    onChange={(n) =>
+                                        updateTimerSettings({
+                                            shortBreakMinutes: n,
+                                        })
+                                    }
+                                />
+
+                                <NumberField
+                                    label="Long break"
+                                    value={
+                                        settings.timer
+                                            .longBreakMinutes
+                                    }
+                                    defaultValue={
+                                        DEFAULT_TIMER_SETTINGS.longBreakMinutes
+                                    }
+                                    onChange={(n) =>
+                                        updateTimerSettings({
+                                            longBreakMinutes: n,
+                                        })
+                                    }
+                                />
+
+                                <NumberField
+                                    label="Focus cycles before long break"
+                                    value={
+                                        settings.timer
+                                            .cyclesBeforeLongBreak
+                                    }
+                                    defaultValue={
+                                        DEFAULT_TIMER_SETTINGS.cyclesBeforeLongBreak
+                                    }
+                                    onChange={(n) =>
+                                        updateTimerSettings({
+                                            cyclesBeforeLongBreak: n,
+                                        })
+                                    }
+                                    min={1}
+                                    max={12}
+                                />
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={resetCycles}
-                                aria-label="Reset Pomodoro cycles"
-                                title="Reset Pomodoro cycles"
-                                className="btn-surface flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-2 text-[13px] font-semibold text-[var(--text-deep)] transition active:scale-[0.98]"
-                            >
-                                <RotateCcw size={15} />
-                                Reset cycles
-                            </button>
-                        </div>
+                            {/* Auto-start next session */}
+                            <div className="py-0.5">
+                                <Toggle
+                                    checked={
+                                        settings.timer.autoStartNext
+                                    }
+                                    onChange={() =>
+                                        updateTimerSettings({
+                                            autoStartNext:
+                                                !settings.timer
+                                                    .autoStartNext,
+                                        })
+                                    }
+                                    label="Auto-start next session"
+                                />
+                            </div>
 
-                        <p className="text-[13px] leading-relaxed text-[var(--text)]/70">
-                            Resets the cycle counter to 1 without
-                            changing the current timer.
-                        </p>
+                            {/* Pomodoro cycle */}
+                            <div className="py-2.5">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <h3 className="text-[15px] font-semibold text-[var(--text-deep)]">
+                                            Pomodoro cycle
+                                        </h3>
+
+                                        <p className="mt-0.5 text-[13px] leading-relaxed text-[var(--text)]/70">
+                                            Current cycle:{" "}
+                                            <span className="font-mono text-[14px] font-bold text-[var(--text-deep)]">
+                                                {cycle}
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={resetCycles}
+                                        aria-label="Reset Pomodoro cycles"
+                                        title="Reset Pomodoro cycles"
+                                        className="btn-surface flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-2 text-[13px] font-semibold text-[var(--text-deep)] transition active:scale-[0.98]"
+                                    >
+                                        <RotateCcw size={15} />
+                                        Reset cycles
+                                    </button>
+                                </div>
+
+                                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]/70">
+                                    Resets the cycle counter to 1
+                                    without changing the current
+                                    timer.
+                                </p>
+                            </div>
+                        </div>
                     </section>
 
                     {/* Pin Mode shortcut */}
