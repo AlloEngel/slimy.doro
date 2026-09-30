@@ -636,7 +636,7 @@ export function SettingsPanel({ onClose }: Props) {
 
                     {/* Application version */}
                     <p className="text-center text-[10px] text-[var(--text)]/40">
-                        slimy.doro v1.0
+                        slimy.doro v1.1
                     </p>
                 </div>
             </div>
