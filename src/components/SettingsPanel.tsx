@@ -57,7 +57,7 @@ function Toggle({
                 }`}
             >
                 <span
-                    className={`toggle-thumb absolute top-0.5 h-5 w-5 rounded-full transition ${
+                    className={`toggle-thumb absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full transition ${
                         checked ? "left-[22px]" : "left-0.5"
                     }`}
                 />
